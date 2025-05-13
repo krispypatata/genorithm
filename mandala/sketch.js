@@ -60,6 +60,7 @@ let opacityStartFrame = 0;
 let initialCycle = 0;
 let scaleStartFrame = 0;
 let initialScaleCycle = 0;
+let isScaleGrowing = true;
 
 // Animation effect controls
 let rotationCheckbox, colorShiftCheckbox;
@@ -253,7 +254,12 @@ function setup() {
       lastScale = currentScale;
     } else {
       // When re-enabling scale animation, smoothly transition from current scale
-      initialScaleCycle = map(currentScale, 0.5, 1.5, 0, 90);
+      // Calculate initial cycle based on current scale and direction
+      if (isScaleGrowing) {
+        initialScaleCycle = map(currentScale, 0.5, 1.5, 0, 90);
+      } else {
+        initialScaleCycle = map(currentScale, 0.5, 1.5, 90, 180);
+      }
       scaleStartFrame = frameCount;
     }
   });
@@ -281,6 +287,8 @@ function newArt() {
   // Reset scale values
   currentScale = 1.0;
   lastScale = 1.0;
+  isScaleGrowing = true;
+  
   // If animation and scale are active, start at normal scale and calculate initial cycle
   if (isAnimating && scaleCheckbox.checked()) {
     // Calculate the cycle position that corresponds to scale 1.0
@@ -634,7 +642,12 @@ function toggleAnimation() {
     // Initialize scale values based on current state
     if (scaleCheckbox.checked()) {
       currentScale = lastScale;
-      initialScaleCycle = map(currentScale, 0.5, 1.5, 0, 90);
+      // Calculate initial cycle based on current scale and direction
+      if (isScaleGrowing) {
+        initialScaleCycle = map(currentScale, 0.5, 1.5, 0, 90);
+      } else {
+        initialScaleCycle = map(currentScale, 0.5, 1.5, 90, 180);
+      }
       scaleStartFrame = frameCount;
     }
     // Show animation controls
@@ -700,6 +713,9 @@ function draw() {
       // Shrinking down from 1.5 to 0.5
       targetScale = map(cycle, 90, 180, 1.5, 0.5);
     }
+    
+    // Update scale direction
+    isScaleGrowing = isGrowing;
     
     // Interpolate to the target scale
     currentScale = lerp(currentScale, targetScale, 0.1);
