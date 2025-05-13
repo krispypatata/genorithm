@@ -57,17 +57,23 @@ let rotationAngle = 0;
 let initialColors = [];
 let opacityStartFrame = 0;
 let initialCycle = 0; // Add this to store the initial cycle value
+let scaleStartFrame = 0; // Add this with other global variables at the top
+let initialScaleCycle = 0; // Add this to store the initial cycle value
 
 // Animation effect controls
 let rotationCheckbox, colorShiftCheckbox;
 let rotationSpeedSlider, colorShiftSpeedSlider;
 let opacityCheckbox, opacitySpeedSlider; // Add new control variables
+let scaleCheckbox, scaleSpeedSlider; // Add scale animation controls
 
 let opacitySpeed = 0.5;
 let targetOpacitySpeed = 0.5;
 let lastPulseState = false;
 let lastAnimationState = false;
 let lastPulseOpacity = 50; // Store the last opacity value when pulse was active
+let scaleSpeed = 0.5; // Add scale speed variable
+let currentScale = 1.0; // Add current scale variable
+let lastScale = 1.0; // Store the last scale value when scale animation is disabled
 
 function setup() {
   let size = min(windowWidth, windowHeight) - 110;
@@ -231,6 +237,35 @@ function setup() {
     }
   });
 
+  // Add scale animation controls
+  animControlY += 30;
+  scaleCheckbox = createCheckbox('Scale', true);
+  scaleCheckbox.position(canvasOffsetX + 10, animControlY);
+  scaleCheckbox.hide();
+  scaleSpeedSlider = createSlider(0, 2, 0.5, 0.01);
+  scaleSpeedSlider.position(canvasOffsetX + 120, animControlY);
+  scaleSpeedSlider.hide();
+
+  scaleCheckbox.changed(() => {
+    if (!scaleCheckbox.checked()) {
+      // Store the current scale when disabling scale animation
+      lastScale = currentScale;
+    } else {
+      // When re-enabling scale animation, smoothly transition from current scale
+      initialScaleCycle = map(currentScale, 0.5, 1.5, 0, 90);
+      scaleStartFrame = frameCount;
+    }
+  });
+
+  scaleSpeedSlider.input(() => {
+    // Only update the speed, don't affect the current scale
+    scaleSpeed = scaleSpeedSlider.value();
+    // Preserve the current cycle position when speed changes
+    let currentCycle = (initialScaleCycle + ((frameCount - scaleStartFrame) * scaleSpeed * 0.5)) % 180;
+    initialScaleCycle = currentCycle;
+    scaleStartFrame = frameCount;
+  });
+
   newArt();
 }
 
@@ -240,6 +275,12 @@ function newArt() {
   // Reset animation parameters
   animationFrame = 0;
   rotationAngle = 0;
+  scaleStartFrame = frameCount;
+  
+  // Reset scale values
+  currentScale = 1.0;
+  lastScale = 1.0;
+  initialScaleCycle = 0;
   
   // Reset pulse state
   lastPulseOpacity = opacityValue;
@@ -580,6 +621,12 @@ function toggleAnimation() {
     animateButton.style("background-color", "lightgreen");
     // Store the current state when starting animation
     lastAnimationState = true;
+    // Initialize scale values based on current state
+    if (scaleCheckbox.checked()) {
+      currentScale = lastScale;
+      initialScaleCycle = map(currentScale, 0.5, 1.5, 0, 90);
+      scaleStartFrame = frameCount;
+    }
     // Show animation controls
     rotationCheckbox.show();
     rotationSpeedSlider.show();
@@ -587,6 +634,8 @@ function toggleAnimation() {
     colorShiftSpeedSlider.show();
     opacityCheckbox.show();
     opacitySpeedSlider.show();
+    scaleCheckbox.show();
+    scaleSpeedSlider.show();
     loop();
   } else {
     animateButton.style("background-color", "pink");
@@ -599,6 +648,8 @@ function toggleAnimation() {
     colorShiftSpeedSlider.hide();
     opacityCheckbox.hide();
     opacitySpeedSlider.hide();
+    scaleCheckbox.hide();
+    scaleSpeedSlider.hide();
     noLoop();
   }
 }
@@ -613,18 +664,46 @@ function draw() {
   let doRotation = rotationCheckbox.checked();
   let doColorShift = colorShiftCheckbox.checked();
   let doOpacityPulse = opacityCheckbox.checked();
+  let doScale = scaleCheckbox.checked();
   rotationSpeed = rotationSpeedSlider.value();
   colorShiftSpeed = colorShiftSpeedSlider.value();
   let opacitySpeed = opacitySpeedSlider.value();
+  scaleSpeed = scaleSpeedSlider.value();
 
   // Update rotation angle if rotation is enabled
   if (doRotation) {
     rotationAngle += rotationSpeed;
   }
 
+  // Calculate scale if enabled
+  if (doScale) {
+    // Create a constant rate transition between 0.5 and 1.5
+    let cycle = (initialScaleCycle + ((frameCount - scaleStartFrame) * scaleSpeed * 0.5)) % 180; // 180 degrees for one complete cycle
+    let targetScale;
+    let isGrowing = cycle < 90; // Track if we're in the growing phase
+    
+    if (isGrowing) {
+      // Going up from 0.5 to 1.5
+      targetScale = map(cycle, 0, 90, 0.5, 1.5);
+    } else {
+      // Going down from 1.5 to 0.5
+      targetScale = map(cycle, 90, 180, 1.5, 0.5);
+    }
+    
+    // Smoothly interpolate to the target scale
+    currentScale = lerp(currentScale, targetScale, 0.1);
+    lastScale = currentScale;
+  } else {
+    // When scale is disabled, maintain the last scale value
+    currentScale = lastScale;
+  }
+
   // Reset and translate to center of canvas
   resetMatrix();
   translate(width / 2, height / 2);
+  
+  // Apply scale transformation
+  scale(currentScale);
   
   // Only update baseHue if color shift is enabled
   if (doColorShift) {
