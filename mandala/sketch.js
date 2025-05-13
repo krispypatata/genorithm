@@ -174,7 +174,7 @@ function setup() {
 
   animateButton = createButton("animate");
   animateButton.position(canvasOffsetX + 170, offsetY + 0);
-  animateButton.style("background-color", "lightblue");
+  animateButton.style("background-color", "pink");
   animateButton.mousePressed(toggleAnimation);
 
   colorMode(HSB, 256, 100, 100, 100);
@@ -514,10 +514,10 @@ function saveJpg() {
 function toggleAnimation() {
   isAnimating = !isAnimating;
   if (isAnimating) {
-    animateButton.style("background-color", "pink");
+    animateButton.style("background-color", "lightgreen");
     loop();
   } else {
-    animateButton.style("background-color", "lightblue");
+    animateButton.style("background-color", "pink");
     noLoop();
   }
 }
