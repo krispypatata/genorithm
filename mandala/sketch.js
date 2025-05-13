@@ -1,8 +1,9 @@
-// Greatly inspired by: Steve's Makerspace Tutorial videos and codes: https://www.youtube.com/@StevesMakerspace
+// Gabinete, Keith Ginoel S. 
+// Greatly inspired by: Steve's Makerspace Tutorial videos and codes: https://www.youtube.com/@StevesMakerspace (Was actually built upon one of his codes)
 
-let strokeWeightValue = 1; // Reduced from 2 to 1 for finer lines
+let strokeWeightValue = 1;
 let overlapMode;
-let curveStyle; // 0: curved, 1: bezier, 2: straight
+let curveStyle;
 let numPetals;
 let numLayers;
 let opacityValue;
@@ -56,23 +57,23 @@ let overlapSlider;
 let rotationAngle = 0;
 let initialColors = [];
 let opacityStartFrame = 0;
-let initialCycle = 0; // Add this to store the initial cycle value
-let scaleStartFrame = 0; // Add this with other global variables at the top
-let initialScaleCycle = 0; // Add this to store the initial cycle value
+let initialCycle = 0;
+let scaleStartFrame = 0;
+let initialScaleCycle = 0;
 
 // Animation effect controls
 let rotationCheckbox, colorShiftCheckbox;
 let rotationSpeedSlider, colorShiftSpeedSlider;
-let opacityCheckbox, opacitySpeedSlider; // Add new control variables
-let scaleCheckbox, scaleSpeedSlider; // Add scale animation controls
+let opacityCheckbox, opacitySpeedSlider;
+let scaleCheckbox, scaleSpeedSlider;
 
 let opacitySpeed = 0.5;
 let targetOpacitySpeed = 0.5;
 let lastPulseState = false;
 let lastAnimationState = false;
 let lastPulseOpacity = 50; // Store the last opacity value when pulse was active
-let scaleSpeed = 0.5; // Add scale speed variable
-let currentScale = 1.0; // Add current scale variable
+let scaleSpeed = 0.5;
+let currentScale = 1.0;
 let lastScale = 1.0; // Store the last scale value when scale animation is disabled
 
 function setup() {
@@ -92,7 +93,7 @@ function setup() {
 
   let offsetY = 0;
 
-  // Create user interface
+  // CREATE UI
   // Petals
   petalSlider = createSlider(10, 30, 20, 2);
   petalSlider.position(canvasOffsetX + 10, 20);
@@ -258,7 +259,7 @@ function setup() {
   });
 
   scaleSpeedSlider.input(() => {
-    // Only update the speed, don't affect the current scale
+    // Only update the speed, don't manipulate the current scale
     scaleSpeed = scaleSpeedSlider.value();
     // Preserve the current cycle position when speed changes
     let currentCycle = (initialScaleCycle + ((frameCount - scaleStartFrame) * scaleSpeed * 0.5)) % 180;
@@ -306,7 +307,7 @@ function newArt() {
   // Reset color shift state
   initialColors = [];
   
-  // get variable values
+  // Generate random values for variables
   if (randomPetalsMode == 1) {
     numPetals = petalSlider.value();
   } else {
@@ -335,10 +336,10 @@ function newArt() {
   }
   
   if (randomCurveMode == true) {
-    curveStyle = floor(random(3)); 
+    curveStyle = floor(random(6)); 
   }
   
-  // Draw the mandala
+  // Draw the mandala art
   for (let j = 0; j < numLayers; j++) {
     let layerProgress = j / numLayers;
     
@@ -392,8 +393,9 @@ function newArt() {
         noStroke();
       }
       
+      // Styles of petals
       switch(curveStyle) {
-        case 0: // Smooth style - gentle curves
+        case 0: // Smooth
           beginShape();
           curveVertex(startX, 0);
           curveVertex(startX, 0);
@@ -413,7 +415,7 @@ function newArt() {
           endShape();
           break;
           
-        case 1: // Wave style - more pronounced curves
+        case 1: // Wave
           beginShape();
           curveVertex(startX, 0);
           curveVertex(startX, 0);
@@ -433,7 +435,7 @@ function newArt() {
           endShape();
           break;
           
-        case 2: // Geometric style - straight shapes
+        case 2: // Geometric
           beginShape();
           vertex(startX, 0);
           vertex(endX, 0);
@@ -449,7 +451,7 @@ function newArt() {
           endShape(CLOSE);
           break;
 
-        case 3: // Spiral style - curved petals with spiral effect
+        case 3: // Spiral
           let spiralFactor = 1 + (j * 0.1);
           beginShape();
           curveVertex(startX, 0);
@@ -470,7 +472,7 @@ function newArt() {
           endShape();
           break;
 
-        case 4: // Zigzag style - angular petals
+        case 4: // Zigzag
           beginShape();
           vertex(startX, 0);
           vertex(ctrl1X, ctrl1Y * 0.5);
@@ -486,7 +488,7 @@ function newArt() {
           endShape();
           break;
 
-        case 5: // Double style - overlapping petals
+        case 5: // Double
           // First set of petals
           beginShape();
           curveVertex(startX, 0);
@@ -662,6 +664,7 @@ function toggleAnimation() {
   }
 }
 
+// Animation
 function draw() {
   if (!isAnimating) return;
   
@@ -691,14 +694,14 @@ function draw() {
     let isGrowing = cycle < 90; // Track if we're in the growing phase
     
     if (isGrowing) {
-      // Going up from 0.5 to 1.5
+      // Growing up from 0.5 to 1.5
       targetScale = map(cycle, 0, 90, 0.5, 1.5);
     } else {
-      // Going down from 1.5 to 0.5
+      // Shrinking down from 1.5 to 0.5
       targetScale = map(cycle, 90, 180, 1.5, 0.5);
     }
     
-    // Smoothly interpolate to the target scale
+    // Interpolate to the target scale
     currentScale = lerp(currentScale, targetScale, 0.1);
     lastScale = currentScale;
   } else {
@@ -750,7 +753,7 @@ function draw() {
     opacityStartFrame = frameCount;
   }
   
-  // Draw the mandala with animation
+  // Draw the mandala art with animation
   for (let j = 0; j < numLayers; j++) {
     let layerProgress = j / numLayers;
     
@@ -839,9 +842,9 @@ function draw() {
         noStroke();
       }
       
-      // Use the existing curve style drawing code
+      // Use the existing styles
       switch(curveStyle) {
-        case 0: // Smooth style
+        case 0: // Smooth
           beginShape();
           curveVertex(startX, 0);
           curveVertex(startX, 0);
@@ -861,7 +864,7 @@ function draw() {
           endShape();
           break;
           
-        case 1: // Wave style
+        case 1: // Wave
           beginShape();
           curveVertex(startX, 0);
           curveVertex(startX, 0);
@@ -881,7 +884,7 @@ function draw() {
           endShape();
           break;
           
-        case 2: // Geometric style
+        case 2: // Geometric
           beginShape();
           vertex(startX, 0);
           vertex(endX, 0);
@@ -897,7 +900,7 @@ function draw() {
           endShape(CLOSE);
           break;
 
-        case 3: // Spiral style
+        case 3: // Spiral
           let spiralFactor = 1 + (j * 0.1);
           beginShape();
           curveVertex(startX, 0);
@@ -918,7 +921,7 @@ function draw() {
           endShape();
           break;
 
-        case 4: // Zigzag style
+        case 4: // Zigzag
           beginShape();
           vertex(startX, 0);
           vertex(ctrl1X, ctrl1Y * 0.5);
@@ -934,7 +937,7 @@ function draw() {
           endShape();
           break;
 
-        case 5: // Double style
+        case 5: // Double
           // First set of petals
           beginShape();
           curveVertex(startX, 0);
