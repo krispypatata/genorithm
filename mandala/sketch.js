@@ -80,7 +80,7 @@ let lastScale = 1.0; // Store the last scale value when scale animation is disab
 function setup() {
   // let size = min(windowWidth, windowHeight) - 110;
   let size = 500;
-  canvas = createCanvas(size, size);
+  let canvas = createCanvas(size, size);
   // canvas.position(10, 95);
   canvas.position(10, 10);
   halfCanvasSize = size / 2;
