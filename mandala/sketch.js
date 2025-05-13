@@ -631,7 +631,7 @@ function styleChanged() {
 }
 
 function saveJpg() {
-  save("myCanvas.jpg");
+  save("genorithm-mandala.jpg");
 }
 
 function toggleAnimation() {
