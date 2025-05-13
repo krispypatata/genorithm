@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <link rel="stylesheet" type="text/css" href="style.css" />
+    <title>Genorithm</title>
+  </head>
+  <body>
+    <div class="container">
+      <div class="sidebar">
+        <h2>Genorithm</h2>
+        <button
+          class="nav-button active"
+          onclick="switchProject('fractal-tree')"
+        >
+          Fractal Tree
+        </button>
+        <button class="nav-button" onclick="switchProject('mandala')">
+          Mandala
+        </button>
+      </div>
+      <div class="content">
+        <iframe
+          id="fractal-tree-frame"
+          class="project-frame active"
+          src="fractal-tree/index.html"
+        ></iframe>
+        <iframe
+          id="mandala-frame"
+          class="project-frame"
+          src="mandala/index.html"
+        ></iframe>
+      </div>
+    </div>
+
+    <script>
+      function switchProject(projectName) {
+        // Hide all frames
+        document.querySelectorAll(".project-frame").forEach((frame) => {
+          frame.classList.remove("active");
+        });
+
+        // Show selected frame
+        document.getElementById(`${projectName}-frame`).classList.add("active");
+
+        // Update button states
+        document.querySelectorAll(".nav-button").forEach((button) => {
+          button.classList.remove("active");
+        });
+        event.target.classList.add("active");
+      }
+    </script>
+  </body>
+</html>
