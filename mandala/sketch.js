@@ -280,7 +280,15 @@ function newArt() {
   // Reset scale values
   currentScale = 1.0;
   lastScale = 1.0;
-  initialScaleCycle = 0;
+  // If animation and scale are active, start at normal scale and calculate initial cycle
+  if (isAnimating && scaleCheckbox.checked()) {
+    // Calculate the cycle position that corresponds to scale 1.0
+    // Since we want to start at scale 1.0, we need to find the cycle position that maps to 1.0
+    // In our mapping, scale 1.0 is at cycle position 45 (middle of the growing phase)
+    initialScaleCycle = 45;
+  } else {
+    initialScaleCycle = 0;
+  }
   
   // Reset pulse state
   lastPulseOpacity = opacityValue;
