@@ -53,6 +53,12 @@ let baseHue;
 let colorHarmony;
 let styleDropdown;
 let overlapSlider;
+let rotationAngle = 0; // Add this with other global variables at the top
+let initialColors = []; // Add this with other global variables at the top
+
+// Animation effect controls
+let rotationCheckbox, colorShiftCheckbox;
+let rotationSpeedSlider, colorShiftSpeedSlider;
 
 function setup() {
   let size = min(windowWidth, windowHeight) - 110;
@@ -179,6 +185,23 @@ function setup() {
 
   colorMode(HSB, 256, 100, 100, 100);
 
+  // Animation effect controls (hidden by default)
+  let animControlY = offsetY + 60;
+  rotationCheckbox = createCheckbox('Rotation', true);
+  rotationCheckbox.position(canvasOffsetX + 10, animControlY);
+  rotationCheckbox.hide();
+  rotationSpeedSlider = createSlider(0, 2, 0.5, 0.01);
+  rotationSpeedSlider.position(canvasOffsetX + 120, animControlY);
+  rotationSpeedSlider.hide();
+
+  animControlY += 30;
+  colorShiftCheckbox = createCheckbox('Color Shift', true);
+  colorShiftCheckbox.position(canvasOffsetX + 10, animControlY);
+  colorShiftCheckbox.hide();
+  colorShiftSpeedSlider = createSlider(0, 2, 0.5, 0.01);
+  colorShiftSpeedSlider.position(canvasOffsetX + 120, animControlY);
+  colorShiftSpeedSlider.hide();
+
   newArt();
 }
 
@@ -187,7 +210,7 @@ function newArt() {
   
   // Reset animation parameters
   animationFrame = 0;
-  pulseAmount = 0;
+  rotationAngle = 0;
   
   // Reset and translate to center of canvas
   resetMatrix();
@@ -196,6 +219,9 @@ function newArt() {
   // Initialize artistic parameters
   baseHue = random(256);
   colorHarmony = floor(random(3)); // 0: Analogous, 1: Complementary, 2: Triadic
+  
+  // Reset color shift state
+  initialColors = [];
   
   // get variable values
   if (randomPetalsMode == 1) {
@@ -268,6 +294,9 @@ function newArt() {
     // Layer-based color adjustments
     sat = sat * (1 - layerProgress * 0.1);
     brt = brt * (1 - layerProgress * 0.05);
+    
+    // Store initial colors for color shift
+    initialColors[j] = {hue, sat, brt};
     
     fill(hue, sat, brt, opacityValue);
     
@@ -515,9 +544,19 @@ function toggleAnimation() {
   isAnimating = !isAnimating;
   if (isAnimating) {
     animateButton.style("background-color", "lightgreen");
+    // Show animation controls
+    rotationCheckbox.show();
+    rotationSpeedSlider.show();
+    colorShiftCheckbox.show();
+    colorShiftSpeedSlider.show();
     loop();
   } else {
     animateButton.style("background-color", "pink");
+    // Hide animation controls
+    rotationCheckbox.hide();
+    rotationSpeedSlider.hide();
+    colorShiftCheckbox.hide();
+    colorShiftSpeedSlider.hide();
     noLoop();
   }
 }
@@ -528,30 +567,40 @@ function draw() {
   background(0);
   animationFrame++;
   
+  // Use animation controls
+  let doRotation = rotationCheckbox.checked();
+  let doColorShift = colorShiftCheckbox.checked();
+  rotationSpeed = rotationSpeedSlider.value();
+  colorShiftSpeed = colorShiftSpeedSlider.value();
+
+  // Update rotation angle if rotation is enabled
+  if (doRotation) {
+    rotationAngle += rotationSpeed;
+  }
+
   // Reset and translate to center of canvas
   resetMatrix();
   translate(width / 2, height / 2);
   
-  // Update animation parameters
-  pulseAmount = sin(animationFrame * pulseSpeed) * 0.1;
-  baseHue = (baseHue + colorShiftSpeed) % 256;
+  // Only update baseHue if color shift is enabled
+  if (doColorShift) {
+    baseHue = (baseHue + colorShiftSpeed) % 256;
+    // Clear initial colors when color shift is enabled
+    initialColors = [];
+  }
   
   // Draw the mandala with animation
   for (let j = 0; j < numLayers; j++) {
     let layerProgress = j / numLayers;
     
-    // Add subtle movement to the petals
-    let timeOffset = j * 0.1;
-    let dynamicOffset = sin(animationFrame * 0.02 + timeOffset) * 5;
-    
-    startX = halfCanvasSize * (0.75 - j * 0.02) - j * layerCushion + dynamicOffset;
-    endX = halfCanvasSize * (0.9 - j * 0.02) - j * layerCushion + dynamicOffset;
+    startX = halfCanvasSize * (0.75 - j * 0.02) - j * layerCushion;
+    endX = halfCanvasSize * (0.9 - j * 0.02) - j * layerCushion;
     startY = 0;
     endY = 0;
     
-    // Control points for curves with animation
-    ctrl1X = startX + (endX - startX) * (0.3 + pulseAmount);
-    ctrl2X = startX + (endX - startX) * (0.7 - pulseAmount);
+    // Control points for curves
+    ctrl1X = startX + (endX - startX) * 0.3;
+    ctrl2X = startX + (endX - startX) * 0.7;
     
     let heightMultiplier = 0.6 - (layerProgress * 0.2);
     ctrl1Y = ctrl1X * tan(petalAngle) * heightMultiplier;
@@ -559,25 +608,58 @@ function draw() {
     
     // Dynamic color transitions
     let hue, sat, brt;
-    switch(colorHarmony) {
-      case 0: // Analogous with animation
-        hue = (baseHue + sin(animationFrame * 0.02 + j) * 20) % 256;
-        sat = 80 + sin(animationFrame * 0.03 + j) * 10;
-        brt = 90 + sin(animationFrame * 0.04 + j) * 10;
-        break;
-      case 1: // Complementary with animation
-        hue = (baseHue + (j % 2) * 128 + sin(animationFrame * 0.02 + j) * 15) % 256;
-        sat = 85 + sin(animationFrame * 0.03 + j) * 10;
-        brt = 85 + sin(animationFrame * 0.04 + j) * 10;
-        break;
-      case 2: // Triadic with animation
-        hue = (baseHue + (j % 3) * 85 + sin(animationFrame * 0.02 + j) * 15) % 256;
-        sat = 75 + sin(animationFrame * 0.03 + j) * 10;
-        brt = 90 + sin(animationFrame * 0.04 + j) * 10;
-        break;
+    
+    if (doColorShift) {
+      // Calculate colors with animation when color shift is enabled
+      switch(colorHarmony) {
+        case 0: // Analogous with animation
+          hue = (baseHue + sin(animationFrame * 0.02 + j) * 20) % 256;
+          sat = 80 + sin(animationFrame * 0.03 + j) * 10;
+          brt = 90 + sin(animationFrame * 0.04 + j) * 10;
+          break;
+        case 1: // Complementary with animation
+          hue = (baseHue + (j % 2) * 128 + sin(animationFrame * 0.02 + j) * 15) % 256;
+          sat = 85 + sin(animationFrame * 0.03 + j) * 10;
+          brt = 85 + sin(animationFrame * 0.04 + j) * 10;
+          break;
+        case 2: // Triadic with animation
+          hue = (baseHue + (j % 3) * 85 + sin(animationFrame * 0.02 + j) * 15) % 256;
+          sat = 75 + sin(animationFrame * 0.03 + j) * 10;
+          brt = 90 + sin(animationFrame * 0.04 + j) * 10;
+          break;
+      }
+      // Store the current colors when color shift is enabled
+      initialColors[j] = {hue, sat, brt};
+    } else {
+      // Use stored colors when color shift is disabled
+      if (initialColors[j]) {
+        hue = initialColors[j].hue;
+        sat = initialColors[j].sat;
+        brt = initialColors[j].brt;
+      } else {
+        // Fallback if no stored colors (shouldn't happen)
+        switch(colorHarmony) {
+          case 0: // Analogous
+            hue = (baseHue + random(-20, 20)) % 256;
+            sat = 80;
+            brt = 90;
+            break;
+          case 1: // Complementary
+            hue = (baseHue + (j % 2) * 128) % 256;
+            sat = 85;
+            brt = 85;
+            break;
+          case 2: // Triadic
+            hue = (baseHue + (j % 3) * 85) % 256;
+            sat = 75;
+            brt = 90;
+            break;
+        }
+        initialColors[j] = {hue, sat, brt};
+      }
     }
     
-    // Layer-based color adjustments with animation
+    // Layer-based color adjustments
     sat = sat * (1 - layerProgress * 0.1);
     brt = brt * (1 - layerProgress * 0.05);
     
@@ -585,7 +667,7 @@ function draw() {
     
     // Draw petals with rotation
     push();
-    rotate(animationFrame * rotationSpeed * (1 - layerProgress * 0.5));
+    rotate(rotationAngle * (1 - layerProgress * 0.5));
     
     for (let i = 0; i < numPetals / 2; i++) {
       if (showOutline == 1) {
