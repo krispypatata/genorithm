@@ -24,15 +24,17 @@ let sliders = {};
 let checkboxes = {};
 let controlsOffsetX = 0;
 let controlsOffsetY = 0;
-let size = 500;
 
 function setup() {
-  createCanvas(size, size);
+  let size = 500;
+  let canvas = createCanvas(size, size);
+  canvas.position(10, 10);
+  
   colorMode(HSB, 360, 100, 100);
   noLoop();
   
   // Title
-  labels.title = createElement('h2', 'Fractal Tree Art Maker').position(10, 0);
+  // labels.title = createElement('h2', 'Fractal Tree Art Maker').position(10, 0);
 
   controlsOffsetX = size + 10;
   controlsOffsetY -= 10;
