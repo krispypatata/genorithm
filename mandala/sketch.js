@@ -36,6 +36,13 @@ let noOverlapButton;
 let randomOverlapButton;
 let newArtButton;
 let printButton;
+let animateButton;
+let isAnimating = false;
+let animationFrame = 0;
+let rotationSpeed = 0.5;
+let colorShiftSpeed = 0.5;
+let pulseSpeed = 0.02;
+let pulseAmount = 0;
 let randomPetalsMode = -1;
 let randomLayersMode = -1;
 let randomAlphaMode = -1;
@@ -54,6 +61,9 @@ function setup() {
   canvas.position(10, 10);
   halfCanvasSize = size / 2;
   angleMode(DEGREES);
+  
+  // Reset and translate to center of canvas
+  resetMatrix();
   translate(width / 2, height / 2);
 
   let canvasOffsetY = size + 10;
@@ -162,6 +172,11 @@ function setup() {
   printButton.style("background-color", "yellow");
   printButton.mousePressed(saveJpg);
 
+  animateButton = createButton("animate");
+  animateButton.position(canvasOffsetX + 170, offsetY + 0);
+  animateButton.style("background-color", "lightblue");
+  animateButton.mousePressed(toggleAnimation);
+
   colorMode(HSB, 256, 100, 100, 100);
 
   newArt();
@@ -169,6 +184,14 @@ function setup() {
 
 function newArt() {
   background(0);
+  
+  // Reset animation parameters
+  animationFrame = 0;
+  pulseAmount = 0;
+  
+  // Reset and translate to center of canvas
+  resetMatrix();
+  translate(width / 2, height / 2);
   
   // Initialize artistic parameters
   baseHue = random(256);
@@ -480,9 +503,238 @@ function styleChanged() {
       randomCurveMode = true;
       break;
   }
-  newArt();
+  
+  // newArt(); // Create new art
 }
 
 function saveJpg() {
   save("myCanvas.jpg");
+}
+
+function toggleAnimation() {
+  isAnimating = !isAnimating;
+  if (isAnimating) {
+    animateButton.style("background-color", "pink");
+    loop();
+  } else {
+    animateButton.style("background-color", "lightblue");
+    noLoop();
+  }
+}
+
+function draw() {
+  if (!isAnimating) return;
+  
+  background(0);
+  animationFrame++;
+  
+  // Reset and translate to center of canvas
+  resetMatrix();
+  translate(width / 2, height / 2);
+  
+  // Update animation parameters
+  pulseAmount = sin(animationFrame * pulseSpeed) * 0.1;
+  baseHue = (baseHue + colorShiftSpeed) % 256;
+  
+  // Draw the mandala with animation
+  for (let j = 0; j < numLayers; j++) {
+    let layerProgress = j / numLayers;
+    
+    // Add subtle movement to the petals
+    let timeOffset = j * 0.1;
+    let dynamicOffset = sin(animationFrame * 0.02 + timeOffset) * 5;
+    
+    startX = halfCanvasSize * (0.75 - j * 0.02) - j * layerCushion + dynamicOffset;
+    endX = halfCanvasSize * (0.9 - j * 0.02) - j * layerCushion + dynamicOffset;
+    startY = 0;
+    endY = 0;
+    
+    // Control points for curves with animation
+    ctrl1X = startX + (endX - startX) * (0.3 + pulseAmount);
+    ctrl2X = startX + (endX - startX) * (0.7 - pulseAmount);
+    
+    let heightMultiplier = 0.6 - (layerProgress * 0.2);
+    ctrl1Y = ctrl1X * tan(petalAngle) * heightMultiplier;
+    ctrl2Y = ctrl2X * tan(petalAngle) * heightMultiplier;
+    
+    // Dynamic color transitions
+    let hue, sat, brt;
+    switch(colorHarmony) {
+      case 0: // Analogous with animation
+        hue = (baseHue + sin(animationFrame * 0.02 + j) * 20) % 256;
+        sat = 80 + sin(animationFrame * 0.03 + j) * 10;
+        brt = 90 + sin(animationFrame * 0.04 + j) * 10;
+        break;
+      case 1: // Complementary with animation
+        hue = (baseHue + (j % 2) * 128 + sin(animationFrame * 0.02 + j) * 15) % 256;
+        sat = 85 + sin(animationFrame * 0.03 + j) * 10;
+        brt = 85 + sin(animationFrame * 0.04 + j) * 10;
+        break;
+      case 2: // Triadic with animation
+        hue = (baseHue + (j % 3) * 85 + sin(animationFrame * 0.02 + j) * 15) % 256;
+        sat = 75 + sin(animationFrame * 0.03 + j) * 10;
+        brt = 90 + sin(animationFrame * 0.04 + j) * 10;
+        break;
+    }
+    
+    // Layer-based color adjustments with animation
+    sat = sat * (1 - layerProgress * 0.1);
+    brt = brt * (1 - layerProgress * 0.05);
+    
+    fill(hue, sat, brt, opacityValue);
+    
+    // Draw petals with rotation
+    push();
+    rotate(animationFrame * rotationSpeed * (1 - layerProgress * 0.5));
+    
+    for (let i = 0; i < numPetals / 2; i++) {
+      if (showOutline == 1) {
+        stroke(0);
+        strokeWeight(strokeWeightValue);
+      } else {
+        noStroke();
+      }
+      
+      // Use the existing curve style drawing code
+      switch(curveStyle) {
+        case 0: // Smooth style
+          beginShape();
+          curveVertex(startX, 0);
+          curveVertex(startX, 0);
+          curveVertex(ctrl1X, ctrl1Y * 0.7);
+          curveVertex(ctrl2X, ctrl2Y * 0.7);
+          curveVertex(endX, 0);
+          curveVertex(endX, 0);
+          endShape();
+          
+          beginShape();
+          curveVertex(startX, 0);
+          curveVertex(startX, 0);
+          curveVertex(ctrl1X, -ctrl1Y * 0.7);
+          curveVertex(ctrl2X, -ctrl2Y * 0.7);
+          curveVertex(endX, 0);
+          curveVertex(endX, 0);
+          endShape();
+          break;
+          
+        case 1: // Wave style
+          beginShape();
+          curveVertex(startX, 0);
+          curveVertex(startX, 0);
+          curveVertex(ctrl1X, ctrl1Y * 1.3);
+          curveVertex(ctrl2X, ctrl2Y * 1.3);
+          curveVertex(endX, 0);
+          curveVertex(endX, 0);
+          endShape();
+          
+          beginShape();
+          curveVertex(startX, 0);
+          curveVertex(startX, 0);
+          curveVertex(ctrl1X, -ctrl1Y * 1.3);
+          curveVertex(ctrl2X, -ctrl2Y * 1.3);
+          curveVertex(endX, 0);
+          curveVertex(endX, 0);
+          endShape();
+          break;
+          
+        case 2: // Geometric style
+          beginShape();
+          vertex(startX, 0);
+          vertex(endX, 0);
+          vertex(endX, ctrl2Y);
+          vertex(startX, ctrl1Y);
+          endShape(CLOSE);
+          
+          beginShape();
+          vertex(startX, 0);
+          vertex(endX, 0);
+          vertex(endX, -ctrl2Y);
+          vertex(startX, -ctrl1Y);
+          endShape(CLOSE);
+          break;
+
+        case 3: // Spiral style
+          let spiralFactor = 1 + (j * 0.1);
+          beginShape();
+          curveVertex(startX, 0);
+          curveVertex(startX, 0);
+          curveVertex(ctrl1X, ctrl1Y * spiralFactor);
+          curveVertex(ctrl2X, ctrl2Y * spiralFactor);
+          curveVertex(endX, 0);
+          curveVertex(endX, 0);
+          endShape();
+          
+          beginShape();
+          curveVertex(startX, 0);
+          curveVertex(startX, 0);
+          curveVertex(ctrl1X, -ctrl1Y * spiralFactor);
+          curveVertex(ctrl2X, -ctrl2Y * spiralFactor);
+          curveVertex(endX, 0);
+          curveVertex(endX, 0);
+          endShape();
+          break;
+
+        case 4: // Zigzag style
+          beginShape();
+          vertex(startX, 0);
+          vertex(ctrl1X, ctrl1Y * 0.5);
+          vertex(ctrl2X, -ctrl2Y * 0.5);
+          vertex(endX, 0);
+          endShape();
+          
+          beginShape();
+          vertex(startX, 0);
+          vertex(ctrl1X, -ctrl1Y * 0.5);
+          vertex(ctrl2X, ctrl2Y * 0.5);
+          vertex(endX, 0);
+          endShape();
+          break;
+
+        case 5: // Double style
+          // First set of petals
+          beginShape();
+          curveVertex(startX, 0);
+          curveVertex(startX, 0);
+          curveVertex(ctrl1X, ctrl1Y * 0.8);
+          curveVertex(ctrl2X, ctrl2Y * 0.8);
+          curveVertex(endX, 0);
+          curveVertex(endX, 0);
+          endShape();
+          
+          beginShape();
+          curveVertex(startX, 0);
+          curveVertex(startX, 0);
+          curveVertex(ctrl1X, -ctrl1Y * 0.8);
+          curveVertex(ctrl2X, -ctrl2Y * 0.8);
+          curveVertex(endX, 0);
+          curveVertex(endX, 0);
+          endShape();
+
+          // Second set of petals (slightly offset)
+          let offset = (endX - startX) * 0.2;
+          beginShape();
+          curveVertex(startX + offset, 0);
+          curveVertex(startX + offset, 0);
+          curveVertex(ctrl1X + offset, ctrl1Y * 0.6);
+          curveVertex(ctrl2X + offset, ctrl2Y * 0.6);
+          curveVertex(endX + offset, 0);
+          curveVertex(endX + offset, 0);
+          endShape();
+          
+          beginShape();
+          curveVertex(startX + offset, 0);
+          curveVertex(startX + offset, 0);
+          curveVertex(ctrl1X + offset, -ctrl1Y * 0.6);
+          curveVertex(ctrl2X + offset, -ctrl2Y * 0.6);
+          curveVertex(endX + offset, 0);
+          curveVertex(endX + offset, 0);
+          endShape();
+          break;
+      }
+      
+      rotate(petalAngle * 2);
+    }
+    pop();
+    rotate(petalAngle);
+  }
 }
