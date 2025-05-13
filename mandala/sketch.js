@@ -53,12 +53,21 @@ let baseHue;
 let colorHarmony;
 let styleDropdown;
 let overlapSlider;
-let rotationAngle = 0; // Add this with other global variables at the top
-let initialColors = []; // Add this with other global variables at the top
+let rotationAngle = 0;
+let initialColors = [];
+let opacityStartFrame = 0;
+let initialCycle = 0; // Add this to store the initial cycle value
 
 // Animation effect controls
 let rotationCheckbox, colorShiftCheckbox;
 let rotationSpeedSlider, colorShiftSpeedSlider;
+let opacityCheckbox, opacitySpeedSlider; // Add new control variables
+
+let opacitySpeed = 0.5;
+let targetOpacitySpeed = 0.5;
+let lastPulseState = false;
+let lastAnimationState = false;
+let lastPulseOpacity = 50; // Store the last opacity value when pulse was active
 
 function setup() {
   let size = min(windowWidth, windowHeight) - 110;
@@ -202,6 +211,26 @@ function setup() {
   colorShiftSpeedSlider.position(canvasOffsetX + 120, animControlY);
   colorShiftSpeedSlider.hide();
 
+  // Add opacity animation controls
+  animControlY += 30;
+  opacityCheckbox = createCheckbox('Opac. Pulse', true);
+  opacityCheckbox.position(canvasOffsetX + 10, animControlY);
+  opacityCheckbox.hide();
+  opacitySpeedSlider = createSlider(0, 2, 0.5, 0.01);
+  opacitySpeedSlider.position(canvasOffsetX + 120, animControlY);
+  opacitySpeedSlider.hide();
+  opacitySpeedSlider.input(() => {
+    targetOpacitySpeed = opacitySpeedSlider.value();
+  });
+
+  opacityCheckbox.changed(() => {
+    if (!opacityCheckbox.checked()) {
+      // Store the current opacity when disabling pulse
+      lastPulseOpacity = currentOpacity;
+      opacityValue = lastPulseOpacity;
+    }
+  });
+
   newArt();
 }
 
@@ -211,6 +240,11 @@ function newArt() {
   // Reset animation parameters
   animationFrame = 0;
   rotationAngle = 0;
+  
+  // Reset pulse state
+  lastPulseOpacity = opacityValue;
+  initialCycle = map(opacityValue, 10, 100, 0, 90);
+  opacityStartFrame = frameCount;
   
   // Reset and translate to center of canvas
   resetMatrix();
@@ -544,19 +578,27 @@ function toggleAnimation() {
   isAnimating = !isAnimating;
   if (isAnimating) {
     animateButton.style("background-color", "lightgreen");
+    // Store the current state when starting animation
+    lastAnimationState = true;
     // Show animation controls
     rotationCheckbox.show();
     rotationSpeedSlider.show();
     colorShiftCheckbox.show();
     colorShiftSpeedSlider.show();
+    opacityCheckbox.show();
+    opacitySpeedSlider.show();
     loop();
   } else {
     animateButton.style("background-color", "pink");
+    // Store the current state when stopping animation
+    lastAnimationState = false;
     // Hide animation controls
     rotationCheckbox.hide();
     rotationSpeedSlider.hide();
     colorShiftCheckbox.hide();
     colorShiftSpeedSlider.hide();
+    opacityCheckbox.hide();
+    opacitySpeedSlider.hide();
     noLoop();
   }
 }
@@ -570,8 +612,10 @@ function draw() {
   // Use animation controls
   let doRotation = rotationCheckbox.checked();
   let doColorShift = colorShiftCheckbox.checked();
+  let doOpacityPulse = opacityCheckbox.checked();
   rotationSpeed = rotationSpeedSlider.value();
   colorShiftSpeed = colorShiftSpeedSlider.value();
+  let opacitySpeed = opacitySpeedSlider.value();
 
   // Update rotation angle if rotation is enabled
   if (doRotation) {
@@ -587,6 +631,36 @@ function draw() {
     baseHue = (baseHue + colorShiftSpeed) % 256;
     // Clear initial colors when color shift is enabled
     initialColors = [];
+  }
+
+  // Calculate opacity pulse if enabled
+  let currentOpacity = opacityValue;
+  if (doOpacityPulse) {
+    // Store the current state
+    lastPulseState = true;
+    
+    // Smoothly transition the speed
+    opacitySpeed = lerp(opacitySpeed, targetOpacitySpeed, 0.1);
+    
+    // Create a constant rate transition between 10% and 100%
+    // The speed slider controls how fast the animation cycles
+    let cycle = (initialCycle + ((frameCount - opacityStartFrame) * opacitySpeed * 0.5)) % 180; // 180 degrees for one complete cycle
+    if (cycle < 90) {
+      // Going up from 10% to 100%
+      currentOpacity = map(cycle, 0, 90, 10, 100);
+    } else {
+      // Going down from 100% to 10%
+      currentOpacity = map(cycle, 90, 180, 100, 10);
+    }
+    // Store the current opacity for when pulse is disabled
+    lastPulseOpacity = currentOpacity;
+  } else {
+    // When opacity pulse is disabled, use the stored opacity value
+    currentOpacity = lastPulseOpacity;
+    opacityValue = lastPulseOpacity;
+    // Reset the cycle to prevent jittering when re-enabling
+    initialCycle = map(opacityValue, 10, 100, 0, 90);
+    opacityStartFrame = frameCount;
   }
   
   // Draw the mandala with animation
@@ -663,7 +737,8 @@ function draw() {
     sat = sat * (1 - layerProgress * 0.1);
     brt = brt * (1 - layerProgress * 0.05);
     
-    fill(hue, sat, brt, opacityValue);
+    // Apply current opacity value
+    fill(hue, sat, brt, currentOpacity);
     
     // Draw petals with rotation
     push();
