@@ -5,4 +5,101 @@ html, body {
 
 canvas {
   display: block;
+  position: absolute;
+  top: 10px;
+  left: 10px;
+}
+
+/* Control panel styling */
+.control-panel {
+  position: absolute;
+  top: 10px;
+  left: 520px; /* Position to the right of the canvas */
+}
+
+/* Slider and label styling */
+.slider-container {
+  margin-bottom: 30px;
+}
+
+.label {
+  display: block;
+  margin-bottom: 5px;
+}
+
+input[type="range"] {
+  width: 170px;
+}
+
+/* Button styling */
+button {
+  margin-right: 10px;
+  padding: 5px 10px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  background-color: #ddd;
+}
+
+button.random {
+  background-color: lightgreen;
+}
+
+button.random.active {
+  background-color: pink;
+}
+
+button.outline, button.no-outline, button.rand-outline {
+  background-color: pink;
+}
+
+button.outline.active, button.no-outline.active, button.rand-outline.active {
+  background-color: lightgreen;
+}
+
+button.new-art {
+  background-color: yellow;
+}
+
+button.save-jpg {
+  background-color: yellow;
+}
+
+button.animate {
+  background-color: pink;
+}
+
+button.animate.active {
+  background-color: lightgreen;
+}
+
+/* Animation controls styling */
+.animation-controls {
+  margin-top: 20px;
+  display: none;
+}
+
+.animation-controls.visible {
+  display: block;
+}
+
+.animation-control {
+  margin-bottom: 10px;
+  display: flex;
+  align-items: center;
+}
+
+.animation-control input[type="checkbox"] {
+  margin-right: 10px;
+}
+
+.animation-control input[type="range"] {
+  margin-left: 10px;
+}
+
+/* Select dropdown styling */
+select {
+  padding: 5px;
+  width: 170px;
+  margin-bottom: 20px;
 }

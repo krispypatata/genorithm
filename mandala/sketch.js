@@ -81,8 +81,9 @@ function setup() {
   // let size = min(windowWidth, windowHeight) - 110;
   let size = 500;
   let canvas = createCanvas(size, size);
-  // canvas.position(10, 95);
-  canvas.position(10, 10);
+  
+  // Canvas positioning now handled by CSS
+  
   halfCanvasSize = size / 2;
   angleMode(DEGREES);
   
@@ -90,72 +91,99 @@ function setup() {
   resetMatrix();
   translate(width / 2, height / 2);
 
-  let canvasOffsetY = size + 10;
-  let canvasOffsetX = size + 10;
-
+  // Create a control panel div to contain all controls
+  let controlPanel = createDiv('');
+  controlPanel.class('control-panel');
+  
   let offsetY = 0;
 
   // CREATE UI
   // Petals
+  let petalContainer = createDiv('');
+  petalContainer.class('slider-container');
+  petalContainer.parent(controlPanel);
+  
+  let noPetals = createElement("p", `No. of petals: 20`);
+  noPetals.class('label');
+  noPetals.parent(petalContainer);
+  
   petalSlider = createSlider(10, 30, 20, 2);
-  petalSlider.position(canvasOffsetX + 10, 20);
-  let noPetals = createElement("noPetals", `No. of petals: 20`);
-  noPetals.position(canvasOffsetX + 40, 0);
-  petalSlider.input(() => noPetals.html(`No. of petals: ${petalSlider.value()}`)); // Update the text when slider moves
+  petalSlider.parent(petalContainer);
+  petalSlider.input(() => noPetals.html(`No. of petals: ${petalSlider.value()}`));
 
   randomPetalButton = createButton("random");
-  randomPetalButton.position(canvasOffsetX + 190, 20);
-  randomPetalButton.style("background-color", "lightgreen");
+  randomPetalButton.class('random');
+  randomPetalButton.parent(petalContainer);
   randomPetalButton.mousePressed(petalsRandom);
   
   // Layers
-  offsetY += 50;
+  let layersContainer = createDiv('');
+  layersContainer.class('slider-container');
+  layersContainer.parent(controlPanel);
+  
+  let noLayers = createElement("p", `No. of layers: 15`);
+  noLayers.class('label');
+  noLayers.parent(layersContainer);
+  
   layersSlider = createSlider(3, 30, 15);
-  layersSlider.position(canvasOffsetX + 10, offsetY + 20);
-  let noLayers = createElement("noLayers", `No. of layers: 15`);
-  noLayers.position(canvasOffsetX + 40, offsetY + 0);
-  layersSlider.input(() => noLayers.html(`No. of layers: ${layersSlider.value()}`)); // Update the text when slider moves
+  layersSlider.parent(layersContainer);
+  layersSlider.input(() => noLayers.html(`No. of layers: ${layersSlider.value()}`));
 
   randomLayersButton = createButton("random");
-  randomLayersButton.position(canvasOffsetX + 190, offsetY + 20);
-  randomLayersButton.style("background-color", "lightgreen");
+  randomLayersButton.class('random');
+  randomLayersButton.parent(layersContainer);
   randomLayersButton.mousePressed(layersRandom);
 
   // Alpha (opacity)
-  offsetY += 50;
+  let alphaContainer = createDiv('');
+  alphaContainer.class('slider-container');
+  alphaContainer.parent(controlPanel);
+  
+  let alpha = createElement("p", `Opacity: 50`);
+  alpha.class('label');
+  alpha.parent(alphaContainer);
+  
   alphaSlider = createSlider(25, 100, 50);
-  alphaSlider.position(canvasOffsetX + 10, offsetY + 20);
-  let alpha = createElement("alpha", `Opacity: 50`);
-  alpha.position(canvasOffsetX + 40, offsetY + 0);
-  alphaSlider.input(() => alpha.html(`Opacity: ${alphaSlider.value()}`)); // Update the text when slider moves
+  alphaSlider.parent(alphaContainer);
+  alphaSlider.input(() => alpha.html(`Opacity: ${alphaSlider.value()}`));
 
   randomAlphaButton = createButton("random");
-  randomAlphaButton.position(canvasOffsetX + 190, offsetY + 20);
-  randomAlphaButton.style("background-color", "lightgreen");
+  randomAlphaButton.class('random');
+  randomAlphaButton.parent(alphaContainer);
   randomAlphaButton.mousePressed(alphaRandom);
 
   // Outlines
-  offsetY += 70;
+  let outlineContainer = createDiv('');
+  outlineContainer.class('slider-container');
+  outlineContainer.parent(controlPanel);
+  
   outlineButton = createButton("outline");
-  outlineButton.position(canvasOffsetX + 10, offsetY + 0);
+  outlineButton.class('outline');
+  outlineButton.parent(outlineContainer);
   outlineButton.mousePressed(outline);
 
   noOutlineButton = createButton("no outline");
-  noOutlineButton.position(canvasOffsetX + 90, offsetY + 0);
+  noOutlineButton.class('no-outline');
+  noOutlineButton.parent(outlineContainer);
   noOutlineButton.mousePressed(noOutline);
 
   randOutButton = createButton("random");
-  randOutButton.position(canvasOffsetX + 190, offsetY + 0);
+  randOutButton.class('rand-outline');
+  randOutButton.parent(outlineContainer);
   randOutButton.mousePressed(randOutline);
   randOutline();
 
   // Styles
-  offsetY += 50;
-  let styleLabel = createElement("style", "Style:");
-  styleLabel.position(canvasOffsetX + 10, offsetY - 20);
+  let styleContainer = createDiv('');
+  styleContainer.class('slider-container');
+  styleContainer.parent(controlPanel);
+  
+  let styleLabel = createElement("p", "Style:");
+  styleLabel.class('label');
+  styleLabel.parent(styleContainer);
   
   styleDropdown = createSelect();
-  styleDropdown.position(canvasOffsetX + 10, offsetY + 0);
+  styleDropdown.parent(styleContainer);
   styleDropdown.option('smooth');
   styleDropdown.option('wave');
   styleDropdown.option('geometric');
@@ -167,11 +195,13 @@ function setup() {
   styleDropdown.changed(styleChanged);
 
   // Overlaps
-  offsetY += 50;
-  overlapSlider = createSlider(0, 100, 50);
-  overlapSlider.position(canvasOffsetX + 10, offsetY + 20);
-  let overlap = createElement("overlap", "");
-  overlap.position(canvasOffsetX + 40, offsetY + 0);
+  let overlapContainer = createDiv('');
+  overlapContainer.class('slider-container');
+  overlapContainer.parent(controlPanel);
+  
+  let overlap = createElement("p", "");
+  overlap.class('label');
+  overlap.parent(overlapContainer);
   
   // Function to get label based on value
   const getSpacingLabel = (value) => {
@@ -179,55 +209,74 @@ function setup() {
   };
   
   // Set initial label
-  overlap.html(`Spacing: ${getSpacingLabel(overlapSlider.value())}`);
+  overlap.html(`Spacing: ${getSpacingLabel(50)}`);
   
+  overlapSlider = createSlider(0, 100, 50);
+  overlapSlider.parent(overlapContainer);
   overlapSlider.input(() => {
     overlap.html(`Spacing: ${getSpacingLabel(overlapSlider.value())}`);
   });
 
-  offsetY += 50;
+  // Control buttons
+  let buttonContainer = createDiv('');
+  buttonContainer.class('slider-container');
+  buttonContainer.parent(controlPanel);
+  
   newArtButton = createButton("new art");
-  newArtButton.position(canvasOffsetX + 10, offsetY + 0);
-  newArtButton.style("background-color", "yellow");
+  newArtButton.class('new-art');
+  newArtButton.parent(buttonContainer);
   newArtButton.mousePressed(newArt);
 
   printButton = createButton("save jpg");
-  printButton.position(canvasOffsetX + 90, offsetY + 0);
-  printButton.style("background-color", "yellow");
+  printButton.class('save-jpg');
+  printButton.parent(buttonContainer);
   printButton.mousePressed(saveJpg);
 
   animateButton = createButton("animate");
-  animateButton.position(canvasOffsetX + 170, offsetY + 0);
-  animateButton.style("background-color", "pink");
+  animateButton.class('animate');
+  animateButton.parent(buttonContainer);
   animateButton.mousePressed(toggleAnimation);
 
   colorMode(HSB, 256, 100, 100, 100);
 
-  // Animation effect controls (hidden by default)
-  let animControlY = offsetY + 60;
+  // Animation controls container
+  let animationControlsContainer = createDiv('');
+  animationControlsContainer.class('animation-controls');
+  animationControlsContainer.id('animation-controls');
+  animationControlsContainer.parent(controlPanel);
+
+  // Rotation controls
+  let rotationContainer = createDiv('');
+  rotationContainer.class('animation-control');
+  rotationContainer.parent(animationControlsContainer);
+  
   rotationCheckbox = createCheckbox('Rotation', true);
-  rotationCheckbox.position(canvasOffsetX + 10, animControlY);
-  rotationCheckbox.hide();
+  rotationCheckbox.parent(rotationContainer);
+  
   rotationSpeedSlider = createSlider(0, 2, 0.5, 0.01);
-  rotationSpeedSlider.position(canvasOffsetX + 120, animControlY);
-  rotationSpeedSlider.hide();
+  rotationSpeedSlider.parent(rotationContainer);
 
-  animControlY += 30;
+  // Color shift controls
+  let colorShiftContainer = createDiv('');
+  colorShiftContainer.class('animation-control');
+  colorShiftContainer.parent(animationControlsContainer);
+  
   colorShiftCheckbox = createCheckbox('Color Shift', true);
-  colorShiftCheckbox.position(canvasOffsetX + 10, animControlY);
-  colorShiftCheckbox.hide();
+  colorShiftCheckbox.parent(colorShiftContainer);
+  
   colorShiftSpeedSlider = createSlider(0, 2, 0.5, 0.01);
-  colorShiftSpeedSlider.position(canvasOffsetX + 120, animControlY);
-  colorShiftSpeedSlider.hide();
+  colorShiftSpeedSlider.parent(colorShiftContainer);
 
-  // Add opacity animation controls
-  animControlY += 30;
+  // Opacity controls
+  let opacityContainer = createDiv('');
+  opacityContainer.class('animation-control');
+  opacityContainer.parent(animationControlsContainer);
+  
   opacityCheckbox = createCheckbox('Opac. Pulse', true);
-  opacityCheckbox.position(canvasOffsetX + 10, animControlY);
-  opacityCheckbox.hide();
+  opacityCheckbox.parent(opacityContainer);
+  
   opacitySpeedSlider = createSlider(0, 2, 0.5, 0.01);
-  opacitySpeedSlider.position(canvasOffsetX + 120, animControlY);
-  opacitySpeedSlider.hide();
+  opacitySpeedSlider.parent(opacityContainer);
   opacitySpeedSlider.input(() => {
     targetOpacitySpeed = opacitySpeedSlider.value();
   });
@@ -240,14 +289,16 @@ function setup() {
     }
   });
 
-  // Add scale animation controls
-  animControlY += 30;
+  // Scale controls
+  let scaleContainer = createDiv('');
+  scaleContainer.class('animation-control');
+  scaleContainer.parent(animationControlsContainer);
+  
   scaleCheckbox = createCheckbox('Scale', true);
-  scaleCheckbox.position(canvasOffsetX + 10, animControlY);
-  scaleCheckbox.hide();
+  scaleCheckbox.parent(scaleContainer);
+  
   scaleSpeedSlider = createSlider(0, 2, 0.5, 0.01);
-  scaleSpeedSlider.position(canvasOffsetX + 120, animControlY);
-  scaleSpeedSlider.hide();
+  scaleSpeedSlider.parent(scaleContainer);
 
   scaleCheckbox.changed(() => {
     if (!scaleCheckbox.checked()) {
@@ -549,51 +600,51 @@ function newArt() {
 function petalsRandom() {
   randomPetalsMode = randomPetalsMode * -1;
   if (randomPetalsMode == 1) {
-    randomPetalButton.style("background-color", "pink");
+    randomPetalButton.addClass('active');
     // Only allow even numbers
     let currentValue = petalSlider.value();
     if (currentValue % 2 !== 0) {
       petalSlider.value(currentValue + 1);
     }
   } else {
-    randomPetalButton.style("background-color", "lightgreen");
+    randomPetalButton.removeClass('active');
   }
 }
 function layersRandom() {
   randomLayersMode = randomLayersMode * -1;
   if (randomLayersMode == 1) {
-    randomLayersButton.style("background-color", "pink");
+    randomLayersButton.addClass('active');
   } else {
-    randomLayersButton.style("background-color", "lightgreen");
+    randomLayersButton.removeClass('active');
   }
 }
 function alphaRandom() {
   randomAlphaMode = randomAlphaMode * -1;
   if (randomAlphaMode == 1) {
-    randomAlphaButton.style("background-color", "pink");
+    randomAlphaButton.addClass('active');
   } else {
-    randomAlphaButton.style("background-color", "lightgreen");
+    randomAlphaButton.removeClass('active');
   }
 }
 function outline() {
   showOutline = 1;
   randomOutlineMode = 0;
-  noOutlineButton.style("background-color", "pink");
-  outlineButton.style("background-color", "lightgreen");
-  randOutButton.style("background-color", "pink");
+  outlineButton.addClass('active');
+  noOutlineButton.removeClass('active');
+  randOutButton.removeClass('active');
 }
 function noOutline() {
   showOutline = 0;
   randomOutlineMode = 0;
-  noOutlineButton.style("background-color", "lightgreen");
-  outlineButton.style("background-color", "pink");
-  randOutButton.style("background-color", "pink");
+  noOutlineButton.addClass('active');
+  outlineButton.removeClass('active');
+  randOutButton.removeClass('active');
 }
 function randOutline() {
   randomOutlineMode = 1;
-  noOutlineButton.style("background-color", "pink");
-  outlineButton.style("background-color", "pink");
-  randOutButton.style("background-color", "lightgreen");
+  randOutButton.addClass('active');
+  outlineButton.removeClass('active');
+  noOutlineButton.removeClass('active');
 }
 function styleChanged() {
   let selected = styleDropdown.value();
@@ -637,9 +688,10 @@ function saveJpg() {
 function toggleAnimation() {
   isAnimating = !isAnimating;
   if (isAnimating) {
-    animateButton.style("background-color", "lightgreen");
+    animateButton.addClass('active');
     // Store the current state when starting animation
     lastAnimationState = true;
+    
     // Initialize scale values based on current state
     if (scaleCheckbox.checked()) {
       currentScale = lastScale;
@@ -651,29 +703,17 @@ function toggleAnimation() {
       }
       scaleStartFrame = frameCount;
     }
+    
     // Show animation controls
-    rotationCheckbox.show();
-    rotationSpeedSlider.show();
-    colorShiftCheckbox.show();
-    colorShiftSpeedSlider.show();
-    opacityCheckbox.show();
-    opacitySpeedSlider.show();
-    scaleCheckbox.show();
-    scaleSpeedSlider.show();
+    document.getElementById('animation-controls').classList.add('visible');
     loop();
   } else {
-    animateButton.style("background-color", "pink");
+    animateButton.removeClass('active');
     // Store the current state when stopping animation
     lastAnimationState = false;
+    
     // Hide animation controls
-    rotationCheckbox.hide();
-    rotationSpeedSlider.hide();
-    colorShiftCheckbox.hide();
-    colorShiftSpeedSlider.hide();
-    opacityCheckbox.hide();
-    opacitySpeedSlider.hide();
-    scaleCheckbox.hide();
-    scaleSpeedSlider.hide();
+    document.getElementById('animation-controls').classList.remove('visible');
     noLoop();
   }
 }
