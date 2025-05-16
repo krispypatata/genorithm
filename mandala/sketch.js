@@ -195,23 +195,74 @@ function generateColors(j, layerProgress, colorHarmony, baseHue, isAnimating, an
   let hue, sat, brt;
   
   if (isAnimating && colorShiftCheckbox.checked()) {
-    // Calculate colors with animation when color shift is enabled
-    switch(colorHarmony) {
-      case 0: // Analogous with animation
-        hue = (baseHue + sin(animationFrame * 0.02 + j) * 20) % 256;
-        sat = 80 + sin(animationFrame * 0.03 + j) * 10;
-        brt = 90 + sin(animationFrame * 0.04 + j) * 10;
-        break;
-      case 1: // Complementary with animation
-        hue = (baseHue + (j % 2) * 128 + sin(animationFrame * 0.02 + j) * 15) % 256;
-        sat = 85 + sin(animationFrame * 0.03 + j) * 10;
-        brt = 85 + sin(animationFrame * 0.04 + j) * 10;
-        break;
-      case 2: // Triadic with animation
-        hue = (baseHue + (j % 3) * 85 + sin(animationFrame * 0.02 + j) * 15) % 256;
-        sat = 75 + sin(animationFrame * 0.03 + j) * 10;
-        brt = 90 + sin(animationFrame * 0.04 + j) * 10;
-        break;
+    // If we have initial colors, use them as starting points for smooth transitions
+    if (initialColors[j]) {
+      let initialHue = initialColors[j].hue;
+      let initialSat = initialColors[j].sat;
+      let initialBrt = initialColors[j].brt;
+      
+      // Calculate target colors based on color harmony
+      let targetHue, targetSat, targetBrt;
+      
+      switch(colorHarmony) {
+        case 0: // Analogous with animation
+          targetHue = (baseHue + sin(animationFrame * 0.02 + j) * 20) % 256;
+          targetSat = 80 + sin(animationFrame * 0.03 + j) * 10;
+          targetBrt = 90 + sin(animationFrame * 0.04 + j) * 10;
+          break;
+        case 1: // Complementary with animation
+          targetHue = (baseHue + (j % 2) * 128 + sin(animationFrame * 0.02 + j) * 15) % 256;
+          targetSat = 85 + sin(animationFrame * 0.03 + j) * 10;
+          targetBrt = 85 + sin(animationFrame * 0.04 + j) * 10;
+          break;
+        case 2: // Triadic with animation
+          targetHue = (baseHue + (j % 3) * 85 + sin(animationFrame * 0.02 + j) * 15) % 256;
+          targetSat = 75 + sin(animationFrame * 0.03 + j) * 10;
+          targetBrt = 90 + sin(animationFrame * 0.04 + j) * 10;
+          break;
+      }
+      
+      // Smoothly transition from initial to target colors
+      // Calculate transition factor based on animation time
+      let transitionFactor = min(1, animationFrame / 60); // Full transition after 60 frames
+      
+      // For hue, need to handle the circular nature of hue values
+      let hueDiff = targetHue - initialHue;
+      
+      // Ensure we take the shortest path around the color wheel
+      if (abs(hueDiff) > 128) {
+        if (hueDiff > 0) {
+          hueDiff = hueDiff - 256;
+        } else {
+          hueDiff = hueDiff + 256;
+        }
+      }
+      
+      // Apply transitions smoothly
+      hue = (initialHue + hueDiff * transitionFactor) % 256;
+      if (hue < 0) hue += 256;
+      
+      sat = lerp(initialSat, targetSat, transitionFactor);
+      brt = lerp(initialBrt, targetBrt, transitionFactor);
+    } else {
+      // If no initial colors exist, calculate them directly
+      switch(colorHarmony) {
+        case 0: // Analogous with animation
+          hue = (baseHue + sin(animationFrame * 0.02 + j) * 20) % 256;
+          sat = 80 + sin(animationFrame * 0.03 + j) * 10;
+          brt = 90 + sin(animationFrame * 0.04 + j) * 10;
+          break;
+        case 1: // Complementary with animation
+          hue = (baseHue + (j % 2) * 128 + sin(animationFrame * 0.02 + j) * 15) % 256;
+          sat = 85 + sin(animationFrame * 0.03 + j) * 10;
+          brt = 85 + sin(animationFrame * 0.04 + j) * 10;
+          break;
+        case 2: // Triadic with animation
+          hue = (baseHue + (j % 3) * 85 + sin(animationFrame * 0.02 + j) * 15) % 256;
+          sat = 75 + sin(animationFrame * 0.03 + j) * 10;
+          brt = 90 + sin(animationFrame * 0.04 + j) * 10;
+          break;
+      }
     }
   } else {
     // Static colors for non-animated state
@@ -392,7 +443,7 @@ let randomPetalsMode = 1;
 let randomLayersMode = 1;
 let randomAlphaMode = 1;
 let randomCurveMode = true;
-let randomOverlapMode = true;
+let randomOverlapMode;
 let randomOutlineMode;
 let baseHue;
 let colorHarmony;
@@ -450,6 +501,21 @@ function setup() {
   resetMatrix();
   translate(width / 2, height / 2);
 
+  // Initialize animation parameters and state
+  baseHue = random(256);
+  colorHarmony = floor(random(3));
+  opacityValue = defaultOpacityValue;
+  lastPulseOpacity = defaultOpacityValue;
+  initialCycle = 0;
+  opacityStartFrame = frameCount;
+  scaleStartFrame = frameCount;
+  initialScaleCycle = 0;
+  currentScale = 1.0;
+  lastScale = 1.0;
+  rotationAngle = 0;
+  lastRotationAngle = 0;
+  initialColors = [];
+  
   // Create a control panel div to contain all controls
   let controlPanel = createDiv('');
   controlPanel.class('control-panel');
@@ -732,7 +798,8 @@ function draw() {
   let doScale = scaleCheckbox.checked();
   rotationSpeed = rotationSpeedSlider.value();
   colorShiftSpeed = colorShiftSpeedSlider.value();
-  let opacitySpeed = opacitySpeedSlider.value();
+  opacitySpeed = opacitySpeedSlider.value();
+  targetOpacitySpeed = targetOpacitySpeed || opacitySpeed;
   scaleSpeed = scaleSpeedSlider.value();
 
   // Update rotation angle if rotation is enabled
@@ -781,9 +848,15 @@ function draw() {
   
   // Only update baseHue if color shift is enabled
   if (doColorShift) {
-    baseHue = (baseHue + colorShiftSpeed) % 256;
-    // Clear initial colors when color shift is enabled
-    initialColors = [];
+    // Ensure baseHue is initialized
+    if (baseHue === undefined) {
+      baseHue = random(256);
+    }
+    
+    // Update baseHue more gradually for smoother transitions
+    // We don't clear initialColors anymore - instead we let each layer
+    // shift its color smoothly from its initial state
+    baseHue = (baseHue + colorShiftSpeed * 0.5) % 256;
   }
 
   // Calculate opacity pulse if enabled
@@ -791,6 +864,11 @@ function draw() {
   if (doOpacityPulse) {
     // Store the current state
     lastPulseState = true;
+    
+    // Ensure opacityValue is initialized
+    if (opacityValue === undefined) {
+      opacityValue = defaultOpacityValue;
+    }
     
     // Smoothly transition the speed
     opacitySpeed = lerp(opacitySpeed, targetOpacitySpeed, 0.1);
@@ -809,11 +887,50 @@ function draw() {
     lastPulseOpacity = currentOpacity;
   } else {
     // When opacity pulse is disabled, use the stored opacity value
-    currentOpacity = lastPulseOpacity;
-    opacityValue = lastPulseOpacity;
+    currentOpacity = lastPulseOpacity || opacityValue;
+    opacityValue = currentOpacity;
     // Reset the cycle to prevent jittering when re-enabling
     initialCycle = map(opacityValue, 10, 100, 0, 90);
     opacityStartFrame = frameCount;
+  }
+  
+  // Make sure numLayers and other needed variables are initialized
+  if (!numLayers) {
+    if (randomLayersMode == 1) {
+      numLayers = floor(random(minLayersValue, maxLayersValue));
+    } else {
+      numLayers = layersSlider.value();
+    }
+  }
+  
+  if (!numPetals) {
+    if (randomPetalsMode == 1) {
+      numPetals = floor(random(Math.floor(minPetalsValue / 2), Math.floor(maxPetalsValue / 2))) * 2;
+    } else {
+      numPetals = petalSlider.value();
+    }
+    petalAngle = 360 / numPetals;
+  }
+  
+  if (!layerCushion) {
+    let overlapValue = overlapSlider.value() / 100;
+    layerCushion = (halfCanvasSize / numLayers) * (0.8 + (overlapValue * 0.3));
+  }
+  
+  if (curveStyle === undefined) {
+    if (randomCurveMode) {
+      curveStyle = floor(random(curveStyleList.length));
+    } else {
+      curveStyle = 0; // Default to smooth
+    }
+  }
+  
+  if (showOutline === undefined) {
+    if (randomOutlineMode == 1) {
+      showOutline = round(random(1));
+    } else {
+      showOutline = 0;
+    }
   }
   
   // Draw the mandala art with animation
@@ -957,10 +1074,91 @@ function toggleAnimation() {
     // Store the current state when starting animation
     lastAnimationState = true;
     
+    // Initialize critical variables if this is the first time animation is enabled
+    // Check and initialize mandala geometry variables
+    if (numLayers === undefined) {
+      if (randomLayersMode == 1) {
+        numLayers = floor(random(minLayersValue, maxLayersValue));
+      } else {
+        numLayers = layersSlider.value();
+      }
+    }
+    
+    if (numPetals === undefined) {
+      if (randomPetalsMode == 1) {
+        numPetals = floor(random(Math.floor(minPetalsValue / 2), Math.floor(maxPetalsValue / 2))) * 2;
+      } else {
+        numPetals = petalSlider.value();
+      }
+      petalAngle = 360 / numPetals;
+    }
+    
+    if (layerCushion === undefined) {
+      let overlapValue = overlapSlider.value() / 100;
+      layerCushion = (halfCanvasSize / numLayers) * (0.8 + (overlapValue * 0.3));
+    }
+    
+    // Initialize style variables
+    if (curveStyle === undefined) {
+      if (randomCurveMode) {
+        curveStyle = floor(random(curveStyleList.length));
+      } else {
+        curveStyle = 0; // Default to smooth
+      }
+    }
+    
+    if (showOutline === undefined) {
+      if (randomOutlineMode == 1) {
+        showOutline = round(random(1));
+      } else {
+        showOutline = 0;
+      }
+    }
+    
+    // Initialize color variables
+    if (baseHue === undefined) {
+      baseHue = random(256);
+    }
+    
+    if (colorHarmony === undefined) {
+      colorHarmony = floor(random(3));
+    }
+    
+    // Initialize animation state
+    if (opacityValue === undefined) {
+      opacityValue = defaultOpacityValue;
+    }
+    
+    if (lastPulseOpacity === undefined) {
+      lastPulseOpacity = opacityValue;
+    }
+    
+    if (animationFrame === undefined) {
+      animationFrame = 0;
+    }
+    
+    // Ensure initialColors has colors for each layer before starting animation
+    // This will make color shift transition smoothly from current colors
+    if (initialColors.length === 0 && numLayers > 0) {
+      // Capture current colors of the mandala for smooth transitions
+      for (let j = 0; j < numLayers; j++) {
+        let layerProgress = j / numLayers;
+        
+        // Generate colors similar to how they're generated in drawMandalaLayer
+        let colorObj = generateColors(j, layerProgress, colorHarmony, baseHue, false, 0);
+        initialColors[j] = {
+          hue: colorObj.hue,
+          sat: colorObj.sat,
+          brt: colorObj.brt
+        };
+      }
+    }
+    
     // Reset color shift animation
     if (colorShiftCheckbox.checked()) {
-      // Clear stored colors to allow color shift to work
-      initialColors = [];
+      // Don't clear initialColors anymore, so transitions are smooth
+      // Set animation start timing
+      colorShiftStartTime = millis();
     }
     
     // Reset opacity pulse animation
@@ -973,7 +1171,18 @@ function toggleAnimation() {
     
     // Initialize scale values based on current state
     if (scaleCheckbox.checked()) {
-      currentScale = lastScale;
+      if (currentScale === undefined) {
+        currentScale = 1.0;
+      }
+      
+      if (lastScale === undefined) {
+        lastScale = 1.0;
+      }
+      
+      if (isScaleGrowing === undefined) {
+        isScaleGrowing = true;
+      }
+      
       // Calculate initial cycle based on current scale and direction
       if (isScaleGrowing) {
         initialScaleCycle = map(currentScale, 0.5, 1.5, 0, 90);
