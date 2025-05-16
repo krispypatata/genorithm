@@ -452,24 +452,33 @@ function setup() {
   petalSlider = petalControl.slider;
   
   randomPetalButton = createToggleButton(petalControl.container, "random", 'random', petalsRandom);
-  // If the initial randomPetalsMode is 1, set the button to active
-  if (randomPetalsMode == 1) randomPetalButton.addClass('active');
+  // If the initial randomPetalsMode is 1, set the button to active and disable slider
+  if (randomPetalsMode == 1) {
+    randomPetalButton.addClass('active');
+    petalSlider.attribute('disabled', '');
+  }
   
   // Layers
   let layersControl = createSliderContainer(controlPanel, "No. of layers", 3, 30, 15);
   layersSlider = layersControl.slider;
   
   randomLayersButton = createToggleButton(layersControl.container, "random", 'random', layersRandom);
-  // If the initial randomLayersMode is 1, set the button to active
-  if (randomLayersMode == 1) randomLayersButton.addClass('active');
+  // If the initial randomLayersMode is 1, set the button to active and disable slider
+  if (randomLayersMode == 1) {
+    randomLayersButton.addClass('active');
+    layersSlider.attribute('disabled', '');
+  }
 
   // Alpha (opacity)
   let alphaControl = createSliderContainer(controlPanel, "Opacity", 25, 100, 50);
   alphaSlider = alphaControl.slider;
   
   randomAlphaButton = createToggleButton(alphaControl.container, "random", 'random', alphaRandom);
-  // If the initial randomAlphaMode is 1, set the button to active
-  if (randomAlphaMode == 1) randomAlphaButton.addClass('active');
+  // If the initial randomAlphaMode is 1, set the button to active and disable slider
+  if (randomAlphaMode == 1) {
+    randomAlphaButton.addClass('active');
+    alphaSlider.attribute('disabled', '');
+  }
 
   // Outlines
   let outlineContainer = createDiv('');
@@ -790,8 +799,12 @@ function petalsRandom() {
     if (currentValue % 2 !== 0) {
       petalSlider.value(currentValue + 1);
     }
+    // Disable slider when random mode is active
+    petalSlider.attribute('disabled', '');
   } else {
     randomPetalButton.removeClass('active');
+    // Enable slider when random mode is inactive
+    petalSlider.removeAttribute('disabled');
   }
 }
 
@@ -801,8 +814,12 @@ function layersRandom() {
   randomLayersMode = randomLayersMode * -1;
   if (randomLayersMode == 1) {
     randomLayersButton.addClass('active');
+    // Disable slider when random mode is active
+    layersSlider.attribute('disabled', '');
   } else {
     randomLayersButton.removeClass('active');
+    // Enable slider when random mode is inactive
+    layersSlider.removeAttribute('disabled');
   }
 }
 
@@ -812,8 +829,12 @@ function alphaRandom() {
   randomAlphaMode = randomAlphaMode * -1;
   if (randomAlphaMode == 1) {
     randomAlphaButton.addClass('active');
+    // Disable slider when random mode is active
+    alphaSlider.attribute('disabled', '');
   } else {
     randomAlphaButton.removeClass('active');
+    // Enable slider when random mode is inactive
+    alphaSlider.removeAttribute('disabled');
   }
 }
 

@@ -31,6 +31,12 @@ input[type="range"] {
   width: 170px;
 }
 
+/* Styling for disabled sliders */
+input[type="range"]:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
 /* Button styling */
 button {
   margin-right: 10px;
