@@ -388,9 +388,9 @@ let rotationSpeed = 0.5;
 let colorShiftSpeed = 0.5;
 let pulseSpeed = 0.02;
 let pulseAmount = 0;
-let randomPetalsMode = -1;
-let randomLayersMode = -1;
-let randomAlphaMode = -1;
+let randomPetalsMode = 1;
+let randomLayersMode = 1;
+let randomAlphaMode = 1;
 let randomCurveMode = true;
 let randomOverlapMode = true;
 let randomOutlineMode;
@@ -452,18 +452,24 @@ function setup() {
   petalSlider = petalControl.slider;
   
   randomPetalButton = createToggleButton(petalControl.container, "random", 'random', petalsRandom);
+  // If the initial randomPetalsMode is 1, set the button to active
+  if (randomPetalsMode == 1) randomPetalButton.addClass('active');
   
   // Layers
   let layersControl = createSliderContainer(controlPanel, "No. of layers", 3, 30, 15);
   layersSlider = layersControl.slider;
   
   randomLayersButton = createToggleButton(layersControl.container, "random", 'random', layersRandom);
+  // If the initial randomLayersMode is 1, set the button to active
+  if (randomLayersMode == 1) randomLayersButton.addClass('active');
 
   // Alpha (opacity)
   let alphaControl = createSliderContainer(controlPanel, "Opacity", 25, 100, 50);
   alphaSlider = alphaControl.slider;
   
   randomAlphaButton = createToggleButton(alphaControl.container, "random", 'random', alphaRandom);
+  // If the initial randomAlphaMode is 1, set the button to active
+  if (randomAlphaMode == 1) randomAlphaButton.addClass('active');
 
   // Outlines
   let outlineContainer = createDiv('');
@@ -626,16 +632,16 @@ function newArt() {
   
   // Generate random values for variables
   if (randomPetalsMode == 1) {
-    numPetals = petalSlider.value();
-  } else {
     numPetals = floor(random(6, 12)) * 2; // Generate even numbers between 12 and 24
+  } else {
+    numPetals = petalSlider.value();
   }
   petalAngle = 360 / numPetals;
   
   if (randomLayersMode == 1) {
-    numLayers = layersSlider.value();
-  } else {
     numLayers = floor(random(8, 16)); 
+  } else {
+    numLayers = layersSlider.value();
   }
   
   // Calculate overlap based on slider value
@@ -643,9 +649,9 @@ function newArt() {
   layerCushion = (halfCanvasSize / numLayers) * (0.8 + (overlapValue * 0.3));
   
   if (randomAlphaMode == 1) {
-    opacityValue = alphaSlider.value();
-  } else {
     opacityValue = random(70, 90); 
+  } else {
+    opacityValue = alphaSlider.value();
   }
   
   if (randomOutlineMode == 1) {

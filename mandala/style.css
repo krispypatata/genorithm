@@ -42,11 +42,11 @@ button {
 }
 
 button.random {
-  background-color: lightgreen;
+  background-color: pink;
 }
 
 button.random.active {
-  background-color: pink;
+  background-color: lightgreen;
 }
 
 button.outline, button.no-outline, button.rand-outline {
