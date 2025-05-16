@@ -44,6 +44,11 @@ function createAnimationControl(parentElement, labelText, defaultChecked = true,
   let slider = createSlider(0, 2, defaultValue, 0.01);
   slider.parent(container);
   
+  // Set initial slider state based on checkbox
+  if (!defaultChecked) {
+    slider.attribute('disabled', '');
+  }
+  
   return { container, checkbox, slider };
 }
 
@@ -462,6 +467,7 @@ let rotationCheckbox, colorShiftCheckbox;
 let rotationSpeedSlider, colorShiftSpeedSlider;
 let opacityCheckbox, opacitySpeedSlider;
 let scaleCheckbox, scaleSpeedSlider;
+let isPulsing = true; // Track if opacity is currently pulsing
 
 let opacitySpeed = 0.5;
 let targetOpacitySpeed = 0.5;
@@ -629,15 +635,26 @@ function setup() {
       // Store the current rotation angle when disabling rotation
       lastRotationAngle = rotationAngle;
       console.log("Rotation disabled, saving angle:", lastRotationAngle);
+      rotationSpeedSlider.attribute('disabled', '');
     } else {
       // When re-enabling, continue from the last angle
       console.log("Rotation enabled, starting from angle:", lastRotationAngle);
+      rotationSpeedSlider.removeAttribute('disabled');
     }
   });
 
   let colorShiftControl = createAnimationControl(animationControlsContainer, 'Color Shift', true, 0.5);
   colorShiftCheckbox = colorShiftControl.checkbox;
   colorShiftSpeedSlider = colorShiftControl.slider;
+
+  // Add event listener for color shift checkbox
+  colorShiftCheckbox.changed(() => {
+    if (!colorShiftCheckbox.checked()) {
+      colorShiftSpeedSlider.attribute('disabled', '');
+    } else {
+      colorShiftSpeedSlider.removeAttribute('disabled');
+    }
+  });
 
   let opacityControl = createAnimationControl(animationControlsContainer, 'Opac. Pulse', true, 0.5);
   opacityCheckbox = opacityControl.checkbox;
@@ -652,9 +669,12 @@ function setup() {
 
   opacityCheckbox.changed(() => {
     if (!opacityCheckbox.checked()) {
-      // Store the current opacity when disabling pulse
-      lastPulseOpacity = currentOpacity;
-      opacityValue = lastPulseOpacity;
+      // When disabling pulse, we should already have the correct lastPulseOpacity from the draw function
+      // The draw() function will handle setting isPulsing = false and freezing at current opacity
+      opacitySpeedSlider.attribute('disabled', '');
+    } else {
+      // Re-enable pulsing - draw() will handle the animation
+      opacitySpeedSlider.removeAttribute('disabled');
     }
   });
 
@@ -666,6 +686,7 @@ function setup() {
     if (!scaleCheckbox.checked()) {
       // Store the current scale when disabling scale animation
       lastScale = currentScale;
+      scaleSpeedSlider.attribute('disabled', '');
     } else {
       // When re-enabling scale animation, smoothly transition from current scale
       // Calculate initial cycle based on current scale and direction
@@ -675,6 +696,7 @@ function setup() {
         initialScaleCycle = map(currentScale, 0.5, 1.5, 90, 180);
       }
       scaleStartFrame = frameCount;
+      scaleSpeedSlider.removeAttribute('disabled');
     }
   });
 
@@ -861,9 +883,10 @@ function draw() {
 
   // Calculate opacity pulse if enabled
   let currentOpacity = opacityValue;
+  
   if (doOpacityPulse) {
-    // Store the current state
-    lastPulseState = true;
+    // If checkbox is checked, start pulsing
+    isPulsing = true;
     
     // Ensure opacityValue is initialized
     if (opacityValue === undefined) {
@@ -886,11 +909,17 @@ function draw() {
     // Store the current opacity for when pulse is disabled
     lastPulseOpacity = currentOpacity;
   } else {
-    // When opacity pulse is disabled, use the stored opacity value
-    currentOpacity = lastPulseOpacity || opacityValue;
-    opacityValue = currentOpacity;
-    // Reset the cycle to prevent jittering when re-enabling
-    initialCycle = map(opacityValue, 10, 100, 0, 90);
+    // When opacity pulse is disabled...
+    if (isPulsing) {
+      // If we just disabled pulsing, freeze at the current opacity value
+      isPulsing = false;
+      // We already have lastPulseOpacity from the previous frame when pulsing was enabled
+    }
+    // Use the stored opacity value
+    currentOpacity = lastPulseOpacity;
+    opacityValue = currentOpacity; // Update opacityValue to match currentOpacity
+    // Initialize cycle in case pulsing is re-enabled
+    initialCycle = map(currentOpacity, 10, 100, 0, 90);
     opacityStartFrame = frameCount;
   }
   
