@@ -1,6 +1,350 @@
 // Gabinete, Keith Ginoel S. 
 // Greatly inspired by: Steve's Makerspace Tutorial videos and codes: https://www.youtube.com/@StevesMakerspace (Was actually built upon one of his codes)
 
+// ═════════════════════════════════════════════════════════════════════════════════════════════════
+// UI HELPER FUNCTIONS
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Creates a container with a label and slider, and returns all three elements
+function createSliderContainer(parentElement, labelText, min, max, defaultValue, step = 1) {
+  let container = createDiv('');
+  container.class('slider-container');
+  container.parent(parentElement);
+  
+  let label = createElement("p", `${labelText}: ${defaultValue}`);
+  label.class('label');
+  label.parent(container);
+  
+  let slider = createSlider(min, max, defaultValue, step);
+  slider.parent(container);
+  slider.input(() => label.html(`${labelText}: ${slider.value()}`));
+  
+  return { container, label, slider };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Creates a button that can be toggled on and off
+function createToggleButton(parentElement, text, className, callback) {
+  let button = createButton(text);
+  button.class(className);
+  button.parent(parentElement);
+  button.mousePressed(callback);
+  return button;
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Creates a checkbox and slider for controlling animation effects
+function createAnimationControl(parentElement, labelText, defaultChecked = true, defaultValue = 0.5) {
+  let container = createDiv('');
+  container.class('animation-control');
+  container.parent(parentElement);
+  
+  let checkbox = createCheckbox(labelText, defaultChecked);
+  checkbox.parent(container);
+  
+  let slider = createSlider(0, 2, defaultValue, 0.01);
+  slider.parent(container);
+  
+  return { container, checkbox, slider };
+}
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════════
+// MANDALA DRAWING FUNCTIONS
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Draws a single petal shape based on the selected style
+function drawPetal(style, startX, endX, ctrl1X, ctrl2X, ctrl1Y, ctrl2Y, layerIndex = 0) {
+  switch(style) {
+    case 0: // Smooth
+      beginShape();
+      curveVertex(startX, 0);
+      curveVertex(startX, 0);
+      curveVertex(ctrl1X, ctrl1Y * 0.7);
+      curveVertex(ctrl2X, ctrl2Y * 0.7);
+      curveVertex(endX, 0);
+      curveVertex(endX, 0);
+      endShape();
+      
+      beginShape();
+      curveVertex(startX, 0);
+      curveVertex(startX, 0);
+      curveVertex(ctrl1X, -ctrl1Y * 0.7);
+      curveVertex(ctrl2X, -ctrl2Y * 0.7);
+      curveVertex(endX, 0);
+      curveVertex(endX, 0);
+      endShape();
+      break;
+      
+    case 1: // Wave
+      beginShape();
+      curveVertex(startX, 0);
+      curveVertex(startX, 0);
+      curveVertex(ctrl1X, ctrl1Y * 1.3);
+      curveVertex(ctrl2X, ctrl2Y * 1.3);
+      curveVertex(endX, 0);
+      curveVertex(endX, 0);
+      endShape();
+      
+      beginShape();
+      curveVertex(startX, 0);
+      curveVertex(startX, 0);
+      curveVertex(ctrl1X, -ctrl1Y * 1.3);
+      curveVertex(ctrl2X, -ctrl2Y * 1.3);
+      curveVertex(endX, 0);
+      curveVertex(endX, 0);
+      endShape();
+      break;
+      
+    case 2: // Geometric
+      beginShape();
+      vertex(startX, 0);
+      vertex(endX, 0);
+      vertex(endX, ctrl2Y);
+      vertex(startX, ctrl1Y);
+      endShape(CLOSE);
+      
+      beginShape();
+      vertex(startX, 0);
+      vertex(endX, 0);
+      vertex(endX, -ctrl2Y);
+      vertex(startX, -ctrl1Y);
+      endShape(CLOSE);
+      break;
+
+    case 3: // Spiral
+      let spiralFactor = 1 + (layerIndex * 0.1);
+      beginShape();
+      curveVertex(startX, 0);
+      curveVertex(startX, 0);
+      curveVertex(ctrl1X, ctrl1Y * spiralFactor);
+      curveVertex(ctrl2X, ctrl2Y * spiralFactor);
+      curveVertex(endX, 0);
+      curveVertex(endX, 0);
+      endShape();
+      
+      beginShape();
+      curveVertex(startX, 0);
+      curveVertex(startX, 0);
+      curveVertex(ctrl1X, -ctrl1Y * spiralFactor);
+      curveVertex(ctrl2X, -ctrl2Y * spiralFactor);
+      curveVertex(endX, 0);
+      curveVertex(endX, 0);
+      endShape();
+      break;
+
+    case 4: // Zigzag
+      beginShape();
+      vertex(startX, 0);
+      vertex(ctrl1X, ctrl1Y * 0.5);
+      vertex(ctrl2X, -ctrl2Y * 0.5);
+      vertex(endX, 0);
+      endShape();
+      
+      beginShape();
+      vertex(startX, 0);
+      vertex(ctrl1X, -ctrl1Y * 0.5);
+      vertex(ctrl2X, ctrl2Y * 0.5);
+      vertex(endX, 0);
+      endShape();
+      break;
+
+    case 5: // Double
+      // First set of petals
+      beginShape();
+      curveVertex(startX, 0);
+      curveVertex(startX, 0);
+      curveVertex(ctrl1X, ctrl1Y * 0.8);
+      curveVertex(ctrl2X, ctrl2Y * 0.8);
+      curveVertex(endX, 0);
+      curveVertex(endX, 0);
+      endShape();
+      
+      beginShape();
+      curveVertex(startX, 0);
+      curveVertex(startX, 0);
+      curveVertex(ctrl1X, -ctrl1Y * 0.8);
+      curveVertex(ctrl2X, -ctrl2Y * 0.8);
+      curveVertex(endX, 0);
+      curveVertex(endX, 0);
+      endShape();
+
+      // Second set of petals (slightly offset)
+      let offset = (endX - startX) * 0.2;
+      beginShape();
+      curveVertex(startX + offset, 0);
+      curveVertex(startX + offset, 0);
+      curveVertex(ctrl1X + offset, ctrl1Y * 0.6);
+      curveVertex(ctrl2X + offset, ctrl2Y * 0.6);
+      curveVertex(endX + offset, 0);
+      curveVertex(endX + offset, 0);
+      endShape();
+      
+      beginShape();
+      curveVertex(startX + offset, 0);
+      curveVertex(startX + offset, 0);
+      curveVertex(ctrl1X + offset, -ctrl1Y * 0.6);
+      curveVertex(ctrl2X + offset, -ctrl2Y * 0.6);
+      curveVertex(endX + offset, 0);
+      curveVertex(endX + offset, 0);
+      endShape();
+      break;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Creates colors for each mandala layer based on color harmony rules
+function generateColors(j, layerProgress, colorHarmony, baseHue, isAnimating, animationFrame) {
+  let hue, sat, brt;
+  
+  if (isAnimating && colorShiftCheckbox.checked()) {
+    // Calculate colors with animation when color shift is enabled
+    switch(colorHarmony) {
+      case 0: // Analogous with animation
+        hue = (baseHue + sin(animationFrame * 0.02 + j) * 20) % 256;
+        sat = 80 + sin(animationFrame * 0.03 + j) * 10;
+        brt = 90 + sin(animationFrame * 0.04 + j) * 10;
+        break;
+      case 1: // Complementary with animation
+        hue = (baseHue + (j % 2) * 128 + sin(animationFrame * 0.02 + j) * 15) % 256;
+        sat = 85 + sin(animationFrame * 0.03 + j) * 10;
+        brt = 85 + sin(animationFrame * 0.04 + j) * 10;
+        break;
+      case 2: // Triadic with animation
+        hue = (baseHue + (j % 3) * 85 + sin(animationFrame * 0.02 + j) * 15) % 256;
+        sat = 75 + sin(animationFrame * 0.03 + j) * 10;
+        brt = 90 + sin(animationFrame * 0.04 + j) * 10;
+        break;
+    }
+  } else {
+    // Static colors for non-animated state
+    switch(colorHarmony) {
+      case 0: // Analogous
+        hue = (baseHue + random(-20, 20)) % 256;
+        sat = random(70, 90);
+        brt = random(85, 100);
+        break;
+      case 1: // Complementary
+        hue = (baseHue + (j % 2) * 128 + random(-10, 10)) % 256;
+        sat = random(75, 95);
+        brt = random(80, 95);
+        break;
+      case 2: // Triadic
+        hue = (baseHue + (j % 3) * 85 + random(-10, 10)) % 256;
+        sat = random(65, 85);
+        brt = random(85, 100);
+        break;
+    }
+  }
+  
+  // Layer-based color adjustments
+  sat = sat * (1 - layerProgress * 0.1);
+  brt = brt * (1 - layerProgress * 0.05);
+  
+  return { hue, sat, brt };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Calculates positions and sizes for each layer in the mandala
+function calculateLayerGeometry(j, numLayers, halfCanvasSize, layerCushion, petalAngle) {
+  let layerProgress = j / numLayers;
+  
+  // Calculate starting and ending positions
+  let startX = halfCanvasSize * (0.75 - j * 0.02) - j * layerCushion;
+  let endX = halfCanvasSize * (0.9 - j * 0.02) - j * layerCushion;
+  
+  // Calculate control points
+  let ctrl1X = startX + (endX - startX) * 0.3;
+  let ctrl2X = startX + (endX - startX) * 0.7;
+  
+  let heightMultiplier = 0.6 - (layerProgress * 0.2); // Decreases with depth
+  let ctrl1Y = ctrl1X * tan(petalAngle) * heightMultiplier;
+  let ctrl2Y = ctrl2X * tan(petalAngle) * heightMultiplier;
+  
+  return {
+    layerProgress,
+    startX,
+    endX,
+    ctrl1X,
+    ctrl2X,
+    ctrl1Y,
+    ctrl2Y
+  };
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Draws one complete layer of the mandala with all its petals
+function drawMandalaLayer(j, numLayers, numPetals, petalAngle, halfCanvasSize, layerCushion, 
+                         colorHarmony, baseHue, opacityValue, showOutline, curveStyle, 
+                         strokeWeightValue, isAnimating, animationFrame, doColorShift, initialColors, 
+                         doRotation, rotationAngle) {
+  // Calculate layer geometry
+  let geometry = calculateLayerGeometry(j, numLayers, halfCanvasSize, layerCushion, petalAngle);
+  let { layerProgress, startX, endX, ctrl1X, ctrl2X, ctrl1Y, ctrl2Y } = geometry;
+  
+  // Handle colors
+  let hue, sat, brt;
+  if (isAnimating && doColorShift) {
+    // Calculate colors with animation
+    let colorObj = generateColors(j, layerProgress, colorHarmony, baseHue, true, animationFrame);
+    hue = colorObj.hue;
+    sat = colorObj.sat;
+    brt = colorObj.brt;
+    
+    // Store the current colors when color shift is enabled
+    initialColors[j] = {hue, sat, brt};
+  } else {
+    // Use stored colors or generate new ones
+    if (initialColors[j]) {
+      hue = initialColors[j].hue;
+      sat = initialColors[j].sat;
+      brt = initialColors[j].brt;
+    } else {
+      // Generate new colors
+      let colorObj = generateColors(j, layerProgress, colorHarmony, baseHue, false, 0);
+      hue = colorObj.hue;
+      sat = colorObj.sat;
+      brt = colorObj.brt;
+      initialColors[j] = {hue, sat, brt};
+    }
+  }
+  
+  // Apply current opacity value
+  fill(hue, sat, brt, opacityValue);
+  
+  // Handle rotation in animated mode
+  if (isAnimating && doRotation) {
+    push();
+    rotate(rotationAngle * (1 - layerProgress * 0.5));
+  }
+  
+  // Draw petals
+  for (let i = 0; i < numPetals / 2; i++) {
+    if (showOutline == 1) {
+      stroke(0);
+      strokeWeight(strokeWeightValue);
+    } else {
+      noStroke();
+    }
+    
+    // Draw petal shape - pass the layer index
+    drawPetal(curveStyle, startX, endX, ctrl1X, ctrl2X, ctrl1Y, ctrl2Y, j);
+    
+    rotate(petalAngle * 2);
+  }
+  
+  // End rotation transform if we used it
+  if (isAnimating && doRotation) {
+    pop();
+  }
+  
+  // Rotate for next layer
+  rotate(petalAngle);
+  
+  return initialColors;
+}
+
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════════
+// START OF P5.JS PROJECT IMPLEMENTATION
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
 let strokeWeightValue = 1;
 let overlapMode;
 let curveStyle;
@@ -77,6 +421,11 @@ let scaleSpeed = 0.5;
 let currentScale = 1.0;
 let lastScale = 1.0; // Store the last scale value when scale animation is disabled
 
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════════
+// P5.JS MAIN FUNCTIONS
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Sets up the canvas and creates all UI controls when the program starts
 function setup() {
   // let size = min(windowWidth, windowHeight) - 110;
   let size = 500;
@@ -97,80 +446,33 @@ function setup() {
   
   let offsetY = 0;
 
-  // CREATE UI
+  // CREATE UI using helper functions
   // Petals
-  let petalContainer = createDiv('');
-  petalContainer.class('slider-container');
-  petalContainer.parent(controlPanel);
+  let petalControl = createSliderContainer(controlPanel, "No. of petals", 10, 30, 20, 2);
+  petalSlider = petalControl.slider;
   
-  let noPetals = createElement("p", `No. of petals: 20`);
-  noPetals.class('label');
-  noPetals.parent(petalContainer);
-  
-  petalSlider = createSlider(10, 30, 20, 2);
-  petalSlider.parent(petalContainer);
-  petalSlider.input(() => noPetals.html(`No. of petals: ${petalSlider.value()}`));
-
-  randomPetalButton = createButton("random");
-  randomPetalButton.class('random');
-  randomPetalButton.parent(petalContainer);
-  randomPetalButton.mousePressed(petalsRandom);
+  randomPetalButton = createToggleButton(petalControl.container, "random", 'random', petalsRandom);
   
   // Layers
-  let layersContainer = createDiv('');
-  layersContainer.class('slider-container');
-  layersContainer.parent(controlPanel);
+  let layersControl = createSliderContainer(controlPanel, "No. of layers", 3, 30, 15);
+  layersSlider = layersControl.slider;
   
-  let noLayers = createElement("p", `No. of layers: 15`);
-  noLayers.class('label');
-  noLayers.parent(layersContainer);
-  
-  layersSlider = createSlider(3, 30, 15);
-  layersSlider.parent(layersContainer);
-  layersSlider.input(() => noLayers.html(`No. of layers: ${layersSlider.value()}`));
-
-  randomLayersButton = createButton("random");
-  randomLayersButton.class('random');
-  randomLayersButton.parent(layersContainer);
-  randomLayersButton.mousePressed(layersRandom);
+  randomLayersButton = createToggleButton(layersControl.container, "random", 'random', layersRandom);
 
   // Alpha (opacity)
-  let alphaContainer = createDiv('');
-  alphaContainer.class('slider-container');
-  alphaContainer.parent(controlPanel);
+  let alphaControl = createSliderContainer(controlPanel, "Opacity", 25, 100, 50);
+  alphaSlider = alphaControl.slider;
   
-  let alpha = createElement("p", `Opacity: 50`);
-  alpha.class('label');
-  alpha.parent(alphaContainer);
-  
-  alphaSlider = createSlider(25, 100, 50);
-  alphaSlider.parent(alphaContainer);
-  alphaSlider.input(() => alpha.html(`Opacity: ${alphaSlider.value()}`));
-
-  randomAlphaButton = createButton("random");
-  randomAlphaButton.class('random');
-  randomAlphaButton.parent(alphaContainer);
-  randomAlphaButton.mousePressed(alphaRandom);
+  randomAlphaButton = createToggleButton(alphaControl.container, "random", 'random', alphaRandom);
 
   // Outlines
   let outlineContainer = createDiv('');
   outlineContainer.class('slider-container');
   outlineContainer.parent(controlPanel);
   
-  outlineButton = createButton("outline");
-  outlineButton.class('outline');
-  outlineButton.parent(outlineContainer);
-  outlineButton.mousePressed(outline);
-
-  noOutlineButton = createButton("no outline");
-  noOutlineButton.class('no-outline');
-  noOutlineButton.parent(outlineContainer);
-  noOutlineButton.mousePressed(noOutline);
-
-  randOutButton = createButton("random");
-  randOutButton.class('rand-outline');
-  randOutButton.parent(outlineContainer);
-  randOutButton.mousePressed(randOutline);
+  outlineButton = createToggleButton(outlineContainer, "outline", 'outline', outline);
+  noOutlineButton = createToggleButton(outlineContainer, "no outline", 'no-outline', noOutline);
+  randOutButton = createToggleButton(outlineContainer, "random", 'rand-outline', randOutline);
   randOutline();
 
   // Styles
@@ -195,26 +497,17 @@ function setup() {
   styleDropdown.changed(styleChanged);
 
   // Overlaps
-  let overlapContainer = createDiv('');
-  overlapContainer.class('slider-container');
-  overlapContainer.parent(controlPanel);
+  let overlapControl = createSliderContainer(controlPanel, "Spacing", 0, 100, 50);
+  overlapSlider = overlapControl.slider;
   
-  let overlap = createElement("p", "");
-  overlap.class('label');
-  overlap.parent(overlapContainer);
-  
-  // Function to get label based on value
+  // Update the label to use descriptive text
   const getSpacingLabel = (value) => {
     return value < 33 ? "Dense" : value < 66 ? "Medium" : "Spread";
   };
   
-  // Set initial label
-  overlap.html(`Spacing: ${getSpacingLabel(50)}`);
-  
-  overlapSlider = createSlider(0, 100, 50);
-  overlapSlider.parent(overlapContainer);
+  overlapControl.label.html(`Spacing: ${getSpacingLabel(50)}`);
   overlapSlider.input(() => {
-    overlap.html(`Spacing: ${getSpacingLabel(overlapSlider.value())}`);
+    overlapControl.label.html(`Spacing: ${getSpacingLabel(overlapSlider.value())}`);
   });
 
   // Control buttons
@@ -222,20 +515,9 @@ function setup() {
   buttonContainer.class('slider-container');
   buttonContainer.parent(controlPanel);
   
-  newArtButton = createButton("new art");
-  newArtButton.class('new-art');
-  newArtButton.parent(buttonContainer);
-  newArtButton.mousePressed(newArt);
-
-  printButton = createButton("save jpg");
-  printButton.class('save-jpg');
-  printButton.parent(buttonContainer);
-  printButton.mousePressed(saveJpg);
-
-  animateButton = createButton("animate");
-  animateButton.class('animate');
-  animateButton.parent(buttonContainer);
-  animateButton.mousePressed(toggleAnimation);
+  newArtButton = createToggleButton(buttonContainer, "new art", 'new-art', newArt);
+  printButton = createToggleButton(buttonContainer, "save jpg", 'save-jpg', saveJpg);
+  animateButton = createToggleButton(buttonContainer, "animate", 'animate', toggleAnimation);
 
   colorMode(HSB, 256, 100, 100, 100);
 
@@ -245,38 +527,18 @@ function setup() {
   animationControlsContainer.id('animation-controls');
   animationControlsContainer.parent(controlPanel);
 
-  // Rotation controls
-  let rotationContainer = createDiv('');
-  rotationContainer.class('animation-control');
-  rotationContainer.parent(animationControlsContainer);
-  
-  rotationCheckbox = createCheckbox('Rotation', true);
-  rotationCheckbox.parent(rotationContainer);
-  
-  rotationSpeedSlider = createSlider(0, 2, 0.5, 0.01);
-  rotationSpeedSlider.parent(rotationContainer);
+  // Create animation controls
+  let rotationControl = createAnimationControl(animationControlsContainer, 'Rotation', true, 0.5);
+  rotationCheckbox = rotationControl.checkbox;
+  rotationSpeedSlider = rotationControl.slider;
 
-  // Color shift controls
-  let colorShiftContainer = createDiv('');
-  colorShiftContainer.class('animation-control');
-  colorShiftContainer.parent(animationControlsContainer);
-  
-  colorShiftCheckbox = createCheckbox('Color Shift', true);
-  colorShiftCheckbox.parent(colorShiftContainer);
-  
-  colorShiftSpeedSlider = createSlider(0, 2, 0.5, 0.01);
-  colorShiftSpeedSlider.parent(colorShiftContainer);
+  let colorShiftControl = createAnimationControl(animationControlsContainer, 'Color Shift', true, 0.5);
+  colorShiftCheckbox = colorShiftControl.checkbox;
+  colorShiftSpeedSlider = colorShiftControl.slider;
 
-  // Opacity controls
-  let opacityContainer = createDiv('');
-  opacityContainer.class('animation-control');
-  opacityContainer.parent(animationControlsContainer);
-  
-  opacityCheckbox = createCheckbox('Opac. Pulse', true);
-  opacityCheckbox.parent(opacityContainer);
-  
-  opacitySpeedSlider = createSlider(0, 2, 0.5, 0.01);
-  opacitySpeedSlider.parent(opacityContainer);
+  let opacityControl = createAnimationControl(animationControlsContainer, 'Opac. Pulse', true, 0.5);
+  opacityCheckbox = opacityControl.checkbox;
+  opacitySpeedSlider = opacityControl.slider;
   opacitySpeedSlider.input(() => {
     targetOpacitySpeed = opacitySpeedSlider.value();
   });
@@ -289,16 +551,9 @@ function setup() {
     }
   });
 
-  // Scale controls
-  let scaleContainer = createDiv('');
-  scaleContainer.class('animation-control');
-  scaleContainer.parent(animationControlsContainer);
-  
-  scaleCheckbox = createCheckbox('Scale', true);
-  scaleCheckbox.parent(scaleContainer);
-  
-  scaleSpeedSlider = createSlider(0, 2, 0.5, 0.01);
-  scaleSpeedSlider.parent(scaleContainer);
+  let scaleControl = createAnimationControl(animationControlsContainer, 'Scale', true, 0.5);
+  scaleCheckbox = scaleControl.checkbox;
+  scaleSpeedSlider = scaleControl.slider;
 
   scaleCheckbox.changed(() => {
     if (!scaleCheckbox.checked()) {
@@ -328,6 +583,8 @@ function setup() {
   newArt();
 }
 
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Creates a new mandala design with fresh settings
 function newArt() {
   background(0);
   
@@ -401,324 +658,18 @@ function newArt() {
   
   // Draw the mandala art
   for (let j = 0; j < numLayers; j++) {
-    let layerProgress = j / numLayers;
-    
-    startX = halfCanvasSize * (0.75 - j * 0.02) - j * layerCushion;
-    endX = halfCanvasSize * (0.9 - j * 0.02) - j * layerCushion;
-    startY = 0;
-    endY = 0;
-    
-    // Control points for curves
-    ctrl1X = startX + (endX - startX) * 0.3;
-    ctrl2X = startX + (endX - startX) * 0.7;
-    
-    let heightMultiplier = 0.6 - (layerProgress * 0.2); // Decreases with depth
-    ctrl1Y = ctrl1X * tan(petalAngle) * heightMultiplier;
-    ctrl2Y = ctrl2X * tan(petalAngle) * heightMultiplier;
-    
-    let hue, sat, brt;
-    switch(colorHarmony) {
-      case 0: // Analogous
-        hue = (baseHue + random(-20, 20)) % 256;
-        sat = random(70, 90);
-        brt = random(85, 100);
-        break;
-      case 1: // Complementary
-        hue = (baseHue + (j % 2) * 128 + random(-10, 10)) % 256;
-        sat = random(75, 95);
-        brt = random(80, 95);
-        break;
-      case 2: // Triadic
-        hue = (baseHue + (j % 3) * 85 + random(-10, 10)) % 256;
-        sat = random(65, 85);
-        brt = random(85, 100);
-        break;
-    }
-    
-    // Layer-based color adjustments
-    sat = sat * (1 - layerProgress * 0.1);
-    brt = brt * (1 - layerProgress * 0.05);
-    
-    // Store initial colors for color shift
-    initialColors[j] = {hue, sat, brt};
-    
-    fill(hue, sat, brt, opacityValue);
-    
-    // Draw petals
-    for (let i = 0; i < numPetals / 2; i++) {
-      if (showOutline == 1) {
-        stroke(0);
-        strokeWeight(strokeWeightValue);
-      } else {
-        noStroke();
-      }
-      
-      // Styles of petals
-      switch(curveStyle) {
-        case 0: // Smooth
-          beginShape();
-          curveVertex(startX, 0);
-          curveVertex(startX, 0);
-          curveVertex(ctrl1X, ctrl1Y * 0.7);
-          curveVertex(ctrl2X, ctrl2Y * 0.7);
-          curveVertex(endX, 0);
-          curveVertex(endX, 0);
-          endShape();
-          
-          beginShape();
-          curveVertex(startX, 0);
-          curveVertex(startX, 0);
-          curveVertex(ctrl1X, -ctrl1Y * 0.7);
-          curveVertex(ctrl2X, -ctrl2Y * 0.7);
-          curveVertex(endX, 0);
-          curveVertex(endX, 0);
-          endShape();
-          break;
-          
-        case 1: // Wave
-          beginShape();
-          curveVertex(startX, 0);
-          curveVertex(startX, 0);
-          curveVertex(ctrl1X, ctrl1Y * 1.3);
-          curveVertex(ctrl2X, ctrl2Y * 1.3);
-          curveVertex(endX, 0);
-          curveVertex(endX, 0);
-          endShape();
-          
-          beginShape();
-          curveVertex(startX, 0);
-          curveVertex(startX, 0);
-          curveVertex(ctrl1X, -ctrl1Y * 1.3);
-          curveVertex(ctrl2X, -ctrl2Y * 1.3);
-          curveVertex(endX, 0);
-          curveVertex(endX, 0);
-          endShape();
-          break;
-          
-        case 2: // Geometric
-          beginShape();
-          vertex(startX, 0);
-          vertex(endX, 0);
-          vertex(endX, ctrl2Y);
-          vertex(startX, ctrl1Y);
-          endShape(CLOSE);
-          
-          beginShape();
-          vertex(startX, 0);
-          vertex(endX, 0);
-          vertex(endX, -ctrl2Y);
-          vertex(startX, -ctrl1Y);
-          endShape(CLOSE);
-          break;
-
-        case 3: // Spiral
-          let spiralFactor = 1 + (j * 0.1);
-          beginShape();
-          curveVertex(startX, 0);
-          curveVertex(startX, 0);
-          curveVertex(ctrl1X, ctrl1Y * spiralFactor);
-          curveVertex(ctrl2X, ctrl2Y * spiralFactor);
-          curveVertex(endX, 0);
-          curveVertex(endX, 0);
-          endShape();
-          
-          beginShape();
-          curveVertex(startX, 0);
-          curveVertex(startX, 0);
-          curveVertex(ctrl1X, -ctrl1Y * spiralFactor);
-          curveVertex(ctrl2X, -ctrl2Y * spiralFactor);
-          curveVertex(endX, 0);
-          curveVertex(endX, 0);
-          endShape();
-          break;
-
-        case 4: // Zigzag
-          beginShape();
-          vertex(startX, 0);
-          vertex(ctrl1X, ctrl1Y * 0.5);
-          vertex(ctrl2X, -ctrl2Y * 0.5);
-          vertex(endX, 0);
-          endShape();
-          
-          beginShape();
-          vertex(startX, 0);
-          vertex(ctrl1X, -ctrl1Y * 0.5);
-          vertex(ctrl2X, ctrl2Y * 0.5);
-          vertex(endX, 0);
-          endShape();
-          break;
-
-        case 5: // Double
-          // First set of petals
-          beginShape();
-          curveVertex(startX, 0);
-          curveVertex(startX, 0);
-          curveVertex(ctrl1X, ctrl1Y * 0.8);
-          curveVertex(ctrl2X, ctrl2Y * 0.8);
-          curveVertex(endX, 0);
-          curveVertex(endX, 0);
-          endShape();
-          
-          beginShape();
-          curveVertex(startX, 0);
-          curveVertex(startX, 0);
-          curveVertex(ctrl1X, -ctrl1Y * 0.8);
-          curveVertex(ctrl2X, -ctrl2Y * 0.8);
-          curveVertex(endX, 0);
-          curveVertex(endX, 0);
-          endShape();
-
-          // Second set of petals (slightly offset)
-          let offset = (endX - startX) * 0.2;
-          beginShape();
-          curveVertex(startX + offset, 0);
-          curveVertex(startX + offset, 0);
-          curveVertex(ctrl1X + offset, ctrl1Y * 0.6);
-          curveVertex(ctrl2X + offset, ctrl2Y * 0.6);
-          curveVertex(endX + offset, 0);
-          curveVertex(endX + offset, 0);
-          endShape();
-          
-          beginShape();
-          curveVertex(startX + offset, 0);
-          curveVertex(startX + offset, 0);
-          curveVertex(ctrl1X + offset, -ctrl1Y * 0.6);
-          curveVertex(ctrl2X + offset, -ctrl2Y * 0.6);
-          curveVertex(endX + offset, 0);
-          curveVertex(endX + offset, 0);
-          endShape();
-          break;
-      }
-      
-      rotate(petalAngle * 2);
-    }
-    rotate(petalAngle);
+    initialColors = drawMandalaLayer(j, numLayers, numPetals, petalAngle, halfCanvasSize, 
+                                   layerCushion, colorHarmony, baseHue, opacityValue, 
+                                   showOutline, curveStyle, strokeWeightValue, 
+                                   false, 0, false, initialColors, false, 0);
   }
 }
 
-// Button functions
-function petalsRandom() {
-  randomPetalsMode = randomPetalsMode * -1;
-  if (randomPetalsMode == 1) {
-    randomPetalButton.addClass('active');
-    // Only allow even numbers
-    let currentValue = petalSlider.value();
-    if (currentValue % 2 !== 0) {
-      petalSlider.value(currentValue + 1);
-    }
-  } else {
-    randomPetalButton.removeClass('active');
-  }
-}
-function layersRandom() {
-  randomLayersMode = randomLayersMode * -1;
-  if (randomLayersMode == 1) {
-    randomLayersButton.addClass('active');
-  } else {
-    randomLayersButton.removeClass('active');
-  }
-}
-function alphaRandom() {
-  randomAlphaMode = randomAlphaMode * -1;
-  if (randomAlphaMode == 1) {
-    randomAlphaButton.addClass('active');
-  } else {
-    randomAlphaButton.removeClass('active');
-  }
-}
-function outline() {
-  showOutline = 1;
-  randomOutlineMode = 0;
-  outlineButton.addClass('active');
-  noOutlineButton.removeClass('active');
-  randOutButton.removeClass('active');
-}
-function noOutline() {
-  showOutline = 0;
-  randomOutlineMode = 0;
-  noOutlineButton.addClass('active');
-  outlineButton.removeClass('active');
-  randOutButton.removeClass('active');
-}
-function randOutline() {
-  randomOutlineMode = 1;
-  randOutButton.addClass('active');
-  outlineButton.removeClass('active');
-  noOutlineButton.removeClass('active');
-}
-function styleChanged() {
-  let selected = styleDropdown.value();
-  switch(selected) {
-    case 'smooth':
-      curveStyle = 0;
-      randomCurveMode = false;
-      break;
-    case 'wave':
-      curveStyle = 1;
-      randomCurveMode = false;
-      break;
-    case 'geometric':
-      curveStyle = 2;
-      randomCurveMode = false;
-      break;
-    case 'spiral':
-      curveStyle = 3;
-      randomCurveMode = false;
-      break;
-    case 'zigzag':
-      curveStyle = 4;
-      randomCurveMode = false;
-      break;
-    case 'double':
-      curveStyle = 5;
-      randomCurveMode = false;
-      break;
-    case 'random':
-      randomCurveMode = true;
-      break;
-  }
-  
-  // newArt(); // Create new art
-}
 
-function saveJpg() {
-  save("genorithm-mandala.jpg");
-}
-
-function toggleAnimation() {
-  isAnimating = !isAnimating;
-  if (isAnimating) {
-    animateButton.addClass('active');
-    // Store the current state when starting animation
-    lastAnimationState = true;
-    
-    // Initialize scale values based on current state
-    if (scaleCheckbox.checked()) {
-      currentScale = lastScale;
-      // Calculate initial cycle based on current scale and direction
-      if (isScaleGrowing) {
-        initialScaleCycle = map(currentScale, 0.5, 1.5, 0, 90);
-      } else {
-        initialScaleCycle = map(currentScale, 0.5, 1.5, 90, 180);
-      }
-      scaleStartFrame = frameCount;
-    }
-    
-    // Show animation controls
-    document.getElementById('animation-controls').classList.add('visible');
-    loop();
-  } else {
-    animateButton.removeClass('active');
-    // Store the current state when stopping animation
-    lastAnimationState = false;
-    
-    // Hide animation controls
-    document.getElementById('animation-controls').classList.remove('visible');
-    noLoop();
-  }
-}
-
-// Animation
+// ═════════════════════════════════════════════════════════════════════════════════════════════════
+// ANIMATION
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Updates and redraws the mandala when animation is on
 function draw() {
   if (!isAnimating) return;
   
@@ -812,233 +763,155 @@ function draw() {
   
   // Draw the mandala art with animation
   for (let j = 0; j < numLayers; j++) {
-    let layerProgress = j / numLayers;
+    initialColors = drawMandalaLayer(j, numLayers, numPetals, petalAngle, halfCanvasSize, 
+                                   layerCushion, colorHarmony, baseHue, currentOpacity, 
+                                   showOutline, curveStyle, strokeWeightValue, 
+                                   true, animationFrame, doColorShift, initialColors, 
+                                   doRotation, rotationAngle);
+  }
+}
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════════
+// UI EVENT HANDLERS
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Toggles between using slider value or random value for petal count
+function petalsRandom() {
+  randomPetalsMode = randomPetalsMode * -1;
+  if (randomPetalsMode == 1) {
+    randomPetalButton.addClass('active');
+    // Only allow even numbers
+    let currentValue = petalSlider.value();
+    if (currentValue % 2 !== 0) {
+      petalSlider.value(currentValue + 1);
+    }
+  } else {
+    randomPetalButton.removeClass('active');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Toggles between using slider value or random value for layer count
+function layersRandom() {
+  randomLayersMode = randomLayersMode * -1;
+  if (randomLayersMode == 1) {
+    randomLayersButton.addClass('active');
+  } else {
+    randomLayersButton.removeClass('active');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Toggles between using slider value or random value for opacity
+function alphaRandom() {
+  randomAlphaMode = randomAlphaMode * -1;
+  if (randomAlphaMode == 1) {
+    randomAlphaButton.addClass('active');
+  } else {
+    randomAlphaButton.removeClass('active');
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Turns on outlines for the mandala petals
+function outline() {
+  showOutline = 1;
+  randomOutlineMode = 0;
+  outlineButton.addClass('active');
+  noOutlineButton.removeClass('active');
+  randOutButton.removeClass('active');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Turns off outlines for the mandala petals
+function noOutline() {
+  showOutline = 0;
+  randomOutlineMode = 0;
+  noOutlineButton.addClass('active');
+  outlineButton.removeClass('active');
+  randOutButton.removeClass('active');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Makes outline choice random for each new mandala
+function randOutline() {
+  randomOutlineMode = 1;
+  randOutButton.addClass('active');
+  outlineButton.removeClass('active');
+  noOutlineButton.removeClass('active');
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Changes the petal style based on dropdown selection
+function styleChanged() {
+  let selected = styleDropdown.value();
+  switch(selected) {
+    case 'smooth':
+      curveStyle = 0;
+      randomCurveMode = false;
+      break;
+    case 'wave':
+      curveStyle = 1;
+      randomCurveMode = false;
+      break;
+    case 'geometric':
+      curveStyle = 2;
+      randomCurveMode = false;
+      break;
+    case 'spiral':
+      curveStyle = 3;
+      randomCurveMode = false;
+      break;
+    case 'zigzag':
+      curveStyle = 4;
+      randomCurveMode = false;
+      break;
+    case 'double':
+      curveStyle = 5;
+      randomCurveMode = false;
+      break;
+    case 'random':
+      randomCurveMode = true;
+      break;
+  }
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Saves the current mandala as a JPG image file
+function saveJpg() {
+  save("genorithm-mandala.jpg");
+}
+
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Turns animation on or off and shows/hides animation controls
+function toggleAnimation() {
+  isAnimating = !isAnimating;
+  if (isAnimating) {
+    animateButton.addClass('active');
+    // Store the current state when starting animation
+    lastAnimationState = true;
     
-    startX = halfCanvasSize * (0.75 - j * 0.02) - j * layerCushion;
-    endX = halfCanvasSize * (0.9 - j * 0.02) - j * layerCushion;
-    startY = 0;
-    endY = 0;
-    
-    // Control points for curves
-    ctrl1X = startX + (endX - startX) * 0.3;
-    ctrl2X = startX + (endX - startX) * 0.7;
-    
-    let heightMultiplier = 0.6 - (layerProgress * 0.2);
-    ctrl1Y = ctrl1X * tan(petalAngle) * heightMultiplier;
-    ctrl2Y = ctrl2X * tan(petalAngle) * heightMultiplier;
-    
-    // Dynamic color transitions
-    let hue, sat, brt;
-    
-    if (doColorShift) {
-      // Calculate colors with animation when color shift is enabled
-      switch(colorHarmony) {
-        case 0: // Analogous with animation
-          hue = (baseHue + sin(animationFrame * 0.02 + j) * 20) % 256;
-          sat = 80 + sin(animationFrame * 0.03 + j) * 10;
-          brt = 90 + sin(animationFrame * 0.04 + j) * 10;
-          break;
-        case 1: // Complementary with animation
-          hue = (baseHue + (j % 2) * 128 + sin(animationFrame * 0.02 + j) * 15) % 256;
-          sat = 85 + sin(animationFrame * 0.03 + j) * 10;
-          brt = 85 + sin(animationFrame * 0.04 + j) * 10;
-          break;
-        case 2: // Triadic with animation
-          hue = (baseHue + (j % 3) * 85 + sin(animationFrame * 0.02 + j) * 15) % 256;
-          sat = 75 + sin(animationFrame * 0.03 + j) * 10;
-          brt = 90 + sin(animationFrame * 0.04 + j) * 10;
-          break;
-      }
-      // Store the current colors when color shift is enabled
-      initialColors[j] = {hue, sat, brt};
-    } else {
-      // Use stored colors when color shift is disabled
-      if (initialColors[j]) {
-        hue = initialColors[j].hue;
-        sat = initialColors[j].sat;
-        brt = initialColors[j].brt;
+    // Initialize scale values based on current state
+    if (scaleCheckbox.checked()) {
+      currentScale = lastScale;
+      // Calculate initial cycle based on current scale and direction
+      if (isScaleGrowing) {
+        initialScaleCycle = map(currentScale, 0.5, 1.5, 0, 90);
       } else {
-        // Fallback if no stored colors (shouldn't happen)
-        switch(colorHarmony) {
-          case 0: // Analogous
-            hue = (baseHue + random(-20, 20)) % 256;
-            sat = 80;
-            brt = 90;
-            break;
-          case 1: // Complementary
-            hue = (baseHue + (j % 2) * 128) % 256;
-            sat = 85;
-            brt = 85;
-            break;
-          case 2: // Triadic
-            hue = (baseHue + (j % 3) * 85) % 256;
-            sat = 75;
-            brt = 90;
-            break;
-        }
-        initialColors[j] = {hue, sat, brt};
+        initialScaleCycle = map(currentScale, 0.5, 1.5, 90, 180);
       }
+      scaleStartFrame = frameCount;
     }
     
-    // Layer-based color adjustments
-    sat = sat * (1 - layerProgress * 0.1);
-    brt = brt * (1 - layerProgress * 0.05);
+    // Show animation controls
+    document.getElementById('animation-controls').classList.add('visible');
+    loop();
+  } else {
+    animateButton.removeClass('active');
+    // Store the current state when stopping animation
+    lastAnimationState = false;
     
-    // Apply current opacity value
-    fill(hue, sat, brt, currentOpacity);
-    
-    // Draw petals with rotation
-    push();
-    rotate(rotationAngle * (1 - layerProgress * 0.5));
-    
-    for (let i = 0; i < numPetals / 2; i++) {
-      if (showOutline == 1) {
-        stroke(0);
-        strokeWeight(strokeWeightValue);
-      } else {
-        noStroke();
-      }
-      
-      // Use the existing styles
-      switch(curveStyle) {
-        case 0: // Smooth
-          beginShape();
-          curveVertex(startX, 0);
-          curveVertex(startX, 0);
-          curveVertex(ctrl1X, ctrl1Y * 0.7);
-          curveVertex(ctrl2X, ctrl2Y * 0.7);
-          curveVertex(endX, 0);
-          curveVertex(endX, 0);
-          endShape();
-          
-          beginShape();
-          curveVertex(startX, 0);
-          curveVertex(startX, 0);
-          curveVertex(ctrl1X, -ctrl1Y * 0.7);
-          curveVertex(ctrl2X, -ctrl2Y * 0.7);
-          curveVertex(endX, 0);
-          curveVertex(endX, 0);
-          endShape();
-          break;
-          
-        case 1: // Wave
-          beginShape();
-          curveVertex(startX, 0);
-          curveVertex(startX, 0);
-          curveVertex(ctrl1X, ctrl1Y * 1.3);
-          curveVertex(ctrl2X, ctrl2Y * 1.3);
-          curveVertex(endX, 0);
-          curveVertex(endX, 0);
-          endShape();
-          
-          beginShape();
-          curveVertex(startX, 0);
-          curveVertex(startX, 0);
-          curveVertex(ctrl1X, -ctrl1Y * 1.3);
-          curveVertex(ctrl2X, -ctrl2Y * 1.3);
-          curveVertex(endX, 0);
-          curveVertex(endX, 0);
-          endShape();
-          break;
-          
-        case 2: // Geometric
-          beginShape();
-          vertex(startX, 0);
-          vertex(endX, 0);
-          vertex(endX, ctrl2Y);
-          vertex(startX, ctrl1Y);
-          endShape(CLOSE);
-          
-          beginShape();
-          vertex(startX, 0);
-          vertex(endX, 0);
-          vertex(endX, -ctrl2Y);
-          vertex(startX, -ctrl1Y);
-          endShape(CLOSE);
-          break;
-
-        case 3: // Spiral
-          let spiralFactor = 1 + (j * 0.1);
-          beginShape();
-          curveVertex(startX, 0);
-          curveVertex(startX, 0);
-          curveVertex(ctrl1X, ctrl1Y * spiralFactor);
-          curveVertex(ctrl2X, ctrl2Y * spiralFactor);
-          curveVertex(endX, 0);
-          curveVertex(endX, 0);
-          endShape();
-          
-          beginShape();
-          curveVertex(startX, 0);
-          curveVertex(startX, 0);
-          curveVertex(ctrl1X, -ctrl1Y * spiralFactor);
-          curveVertex(ctrl2X, -ctrl2Y * spiralFactor);
-          curveVertex(endX, 0);
-          curveVertex(endX, 0);
-          endShape();
-          break;
-
-        case 4: // Zigzag
-          beginShape();
-          vertex(startX, 0);
-          vertex(ctrl1X, ctrl1Y * 0.5);
-          vertex(ctrl2X, -ctrl2Y * 0.5);
-          vertex(endX, 0);
-          endShape();
-          
-          beginShape();
-          vertex(startX, 0);
-          vertex(ctrl1X, -ctrl1Y * 0.5);
-          vertex(ctrl2X, ctrl2Y * 0.5);
-          vertex(endX, 0);
-          endShape();
-          break;
-
-        case 5: // Double
-          // First set of petals
-          beginShape();
-          curveVertex(startX, 0);
-          curveVertex(startX, 0);
-          curveVertex(ctrl1X, ctrl1Y * 0.8);
-          curveVertex(ctrl2X, ctrl2Y * 0.8);
-          curveVertex(endX, 0);
-          curveVertex(endX, 0);
-          endShape();
-          
-          beginShape();
-          curveVertex(startX, 0);
-          curveVertex(startX, 0);
-          curveVertex(ctrl1X, -ctrl1Y * 0.8);
-          curveVertex(ctrl2X, -ctrl2Y * 0.8);
-          curveVertex(endX, 0);
-          curveVertex(endX, 0);
-          endShape();
-
-          // Second set of petals (slightly offset)
-          let offset = (endX - startX) * 0.2;
-          beginShape();
-          curveVertex(startX + offset, 0);
-          curveVertex(startX + offset, 0);
-          curveVertex(ctrl1X + offset, ctrl1Y * 0.6);
-          curveVertex(ctrl2X + offset, ctrl2Y * 0.6);
-          curveVertex(endX + offset, 0);
-          curveVertex(endX + offset, 0);
-          endShape();
-          
-          beginShape();
-          curveVertex(startX + offset, 0);
-          curveVertex(startX + offset, 0);
-          curveVertex(ctrl1X + offset, -ctrl1Y * 0.6);
-          curveVertex(ctrl2X + offset, -ctrl2Y * 0.6);
-          curveVertex(endX + offset, 0);
-          curveVertex(endX + offset, 0);
-          endShape();
-          break;
-      }
-      
-      rotate(petalAngle * 2);
-    }
-    pop();
-    rotate(petalAngle);
+    // Hide animation controls
+    document.getElementById('animation-controls').classList.remove('visible');
+    noLoop();
   }
 }
