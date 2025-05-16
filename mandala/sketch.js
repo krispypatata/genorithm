@@ -421,7 +421,16 @@ let scaleSpeed = 0.5;
 let currentScale = 1.0;
 let lastScale = 1.0; // Store the last scale value when scale animation is disabled
 
+let minPetalsValue = 10, maxPetalsValue = 30, defaultPetalsValue = 20;
+let minLayersValue = 3, maxLayersValue = 30, defaultLayersValue = 15;
+let minOpacityValue = 25, maxOpacityValue = 100, defaultOpacityValue = 50;
 
+let curveStyleList = ['smooth', 'wave', 'geometric', 'spiral', 'zigzag', 'double'];
+// Convert the array to an object with the array values as keys (so we can access them like this: curveStyleValues.smooth)
+let curveStyleValues = curveStyleList.reduce((acc, style) => {
+  acc[style] = style;
+  return acc;
+}, {});
 // ═════════════════════════════════════════════════════════════════════════════════════════════════
 // P5.JS MAIN FUNCTIONS
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
@@ -448,7 +457,7 @@ function setup() {
 
   // CREATE UI using helper functions
   // Petals
-  let petalControl = createSliderContainer(controlPanel, "No. of petals", 10, 30, 20, 2);
+  let petalControl = createSliderContainer(controlPanel, "No. of petals", minPetalsValue, maxPetalsValue, defaultPetalsValue, 2);
   petalSlider = petalControl.slider;
   
   randomPetalButton = createToggleButton(petalControl.container, "random", 'random', petalsRandom);
@@ -459,7 +468,7 @@ function setup() {
   }
   
   // Layers
-  let layersControl = createSliderContainer(controlPanel, "No. of layers", 3, 30, 15);
+  let layersControl = createSliderContainer(controlPanel, "No. of layers", minLayersValue, maxLayersValue, defaultLayersValue);
   layersSlider = layersControl.slider;
   
   randomLayersButton = createToggleButton(layersControl.container, "random", 'random', layersRandom);
@@ -470,7 +479,7 @@ function setup() {
   }
 
   // Alpha (opacity)
-  let alphaControl = createSliderContainer(controlPanel, "Opacity", 25, 100, 50);
+  let alphaControl = createSliderContainer(controlPanel, "Opacity", minOpacityValue, maxOpacityValue, defaultOpacityValue);
   alphaSlider = alphaControl.slider;
   
   randomAlphaButton = createToggleButton(alphaControl.container, "random", 'random', alphaRandom);
@@ -501,12 +510,12 @@ function setup() {
   
   styleDropdown = createSelect();
   styleDropdown.parent(styleContainer);
-  styleDropdown.option('smooth');
-  styleDropdown.option('wave');
-  styleDropdown.option('geometric');
-  styleDropdown.option('spiral');
-  styleDropdown.option('zigzag');
-  styleDropdown.option('double');
+  styleDropdown.option(curveStyleValues.smooth);
+  styleDropdown.option(curveStyleValues.wave);
+  styleDropdown.option(curveStyleValues.geometric);
+  styleDropdown.option(curveStyleValues.spiral);
+  styleDropdown.option(curveStyleValues.zigzag);
+  styleDropdown.option(curveStyleValues.double);
   styleDropdown.option('random');
   styleDropdown.selected('random');
   styleDropdown.changed(styleChanged);
@@ -641,14 +650,17 @@ function newArt() {
   
   // Generate random values for variables
   if (randomPetalsMode == 1) {
-    numPetals = floor(random(6, 12)) * 2; // Generate even numbers between 12 and 24
+     // Generate even numbers between the min and max values
+    // Divide the min and max values by 2 since the slider's step is set to 2
+    numPetals = floor(random(Math.floor(minPetalsValue / 2), Math.floor(maxPetalsValue / 2))) * 2;
   } else {
     numPetals = petalSlider.value();
   }
   petalAngle = 360 / numPetals;
   
   if (randomLayersMode == 1) {
-    numLayers = floor(random(8, 16)); 
+    // Generate numbers between the min and max values
+    numLayers = floor(random(minLayersValue, maxLayersValue)); 
   } else {
     numLayers = layersSlider.value();
   }
@@ -658,7 +670,8 @@ function newArt() {
   layerCushion = (halfCanvasSize / numLayers) * (0.8 + (overlapValue * 0.3));
   
   if (randomAlphaMode == 1) {
-    opacityValue = random(70, 90); 
+    // Generate a random number between the min and max values
+    opacityValue = random(minOpacityValue, maxOpacityValue); 
   } else {
     opacityValue = alphaSlider.value();
   }
@@ -668,7 +681,7 @@ function newArt() {
   }
   
   if (randomCurveMode == true) {
-    curveStyle = floor(random(6)); 
+    curveStyle = floor(random(curveStyleList.length)); 
   }
   
   // Draw the mandala art
@@ -872,27 +885,27 @@ function randOutline() {
 function styleChanged() {
   let selected = styleDropdown.value();
   switch(selected) {
-    case 'smooth':
+    case curveStyleValues.smooth:
       curveStyle = 0;
       randomCurveMode = false;
       break;
-    case 'wave':
+    case curveStyleValues.wave:
       curveStyle = 1;
       randomCurveMode = false;
       break;
-    case 'geometric':
+    case curveStyleValues.geometric:
       curveStyle = 2;
       randomCurveMode = false;
       break;
-    case 'spiral':
+    case curveStyleValues.spiral:
       curveStyle = 3;
       randomCurveMode = false;
       break;
-    case 'zigzag':
+    case curveStyleValues.zigzag:
       curveStyle = 4;
       randomCurveMode = false;
       break;
-    case 'double':
+    case curveStyleValues.double:
       curveStyle = 5;
       randomCurveMode = false;
       break;
