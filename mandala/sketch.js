@@ -577,6 +577,10 @@ function setup() {
   opacityCheckbox = opacityControl.checkbox;
   opacitySpeedSlider = opacityControl.slider;
   opacitySpeedSlider.input(() => {
+    // Store the current cycle position when speed changes
+    let currentCycle = (initialCycle + ((frameCount - opacityStartFrame) * opacitySpeed * 0.5)) % 180;
+    initialCycle = currentCycle;
+    opacityStartFrame = frameCount;
     targetOpacitySpeed = opacitySpeedSlider.value();
   });
 
@@ -961,8 +965,9 @@ function toggleAnimation() {
     
     // Reset opacity pulse animation
     if (opacityCheckbox.checked()) {
-      lastPulseOpacity = opacityValue;
-      initialCycle = map(opacityValue, 10, 100, 0, 90);
+      // Use lastPulseOpacity instead of opacityValue to prevent jitter
+      // This ensures we continue from the current visible opacity
+      initialCycle = map(lastPulseOpacity, 10, 100, 0, 90);
       opacityStartFrame = frameCount;
     }
     
