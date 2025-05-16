@@ -930,6 +930,19 @@ function toggleAnimation() {
     // Store the current state when starting animation
     lastAnimationState = true;
     
+    // Reset color shift animation
+    if (colorShiftCheckbox.checked()) {
+      // Clear stored colors to allow color shift to work
+      initialColors = [];
+    }
+    
+    // Reset opacity pulse animation
+    if (opacityCheckbox.checked()) {
+      lastPulseOpacity = opacityValue;
+      initialCycle = map(opacityValue, 10, 100, 0, 90);
+      opacityStartFrame = frameCount;
+    }
+    
     // Initialize scale values based on current state
     if (scaleCheckbox.checked()) {
       currentScale = lastScale;
