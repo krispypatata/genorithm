@@ -5,4 +5,85 @@ html, body {
 
 canvas {
   display: block;
+  position: absolute;
+  left: 10px;
+  top: 10px;
+}
+
+/* Controls container */
+.controls-container {
+  position: absolute;
+  left: 520px; /* 10px + canvas width (500px) + 10px */
+  top: 0;
+}
+
+/* Headings */
+h3 {
+  font-weight: bold;
+  margin-top: 40px;
+  margin-bottom: 10px;
+}
+
+/* Form elements */
+label {
+  display: inline-block;
+  width: 120px;
+  margin-bottom: 20px;
+}
+
+input[type="range"] {
+  width: 150px;
+}
+
+/* Control groups */
+.control-group {
+  margin-bottom: 10px;
+  position: relative;
+}
+
+/* Checkbox containers */
+.checkbox-container {
+  position: relative;
+  display: inline-block;
+  vertical-align: middle;
+  width: 150px;
+}
+
+.checkbox-container input[type="checkbox"] {
+  vertical-align: middle;
+}
+
+.checkbox-container.active {
+  background-color: rgba(0, 0, 0, 0.1);
+  border-radius: 3px;
+}
+
+/* Color variation controls */
+.color-variation-controls {
+  display: none;
+}
+
+/* Solid color controls */
+.solid-color-controls {
+  display: block;
+}
+
+/* When colorVariation is active */
+.color-variation-active .color-variation-controls {
+  display: block;
+}
+
+.color-variation-active .solid-color-controls {
+  display: none;
+}
+
+/* Buttons */
+button {
+  padding: 8px 12px;
+  margin-top: 20px;
+}
+
+button.active {
+  background-color: #ddd;
+  border-color: #999;
 }

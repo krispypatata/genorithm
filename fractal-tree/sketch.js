@@ -22,177 +22,323 @@ let params = {
 let labels = {};
 let sliders = {};
 let checkboxes = {};
-let controlsOffsetX = 0;
-let controlsOffsetY = 0;
+let controlsContainer;
 
 function setup() {
   let size = 500;
   let canvas = createCanvas(size, size);
-  canvas.position(10, 10);
   
   colorMode(HSB, 360, 100, 100);
   noLoop();
   
-  // Title
-  // labels.title = createElement('h2', 'Fractal Tree Art Maker').position(10, 0);
-
-  controlsOffsetX = size + 10;
-  controlsOffsetY -= 10;
-
+  // Create controls container
+  controlsContainer = createDiv('');
+  controlsContainer.class('controls-container');
+  
   // ===== CORE PARAMETERS =====
-  labels.heading1 = createElement('h3', 'Core Parameters').style('font-weight', 'bold').position(controlsOffsetX + 20, controlsOffsetY + 0);
+  let coreSection = createDiv('');
+  coreSection.parent(controlsContainer);
+  
+  labels.heading1 = createElement('h3', 'Core Parameters');
+  labels.heading1.parent(coreSection);
   
   // Angle 1
-  controlsOffsetY += 30;
-  labels.angle1 = createElement('label', 'Branch Angle:').position(controlsOffsetX + 20, controlsOffsetY + 10); // Angle Between Branches
+  let angle1Group = createDiv('');
+  angle1Group.class('control-group');
+  angle1Group.parent(coreSection);
+  
+  labels.angle1 = createElement('label', 'Branch Angle:');
+  labels.angle1.parent(angle1Group);
+  
   sliders.angle1 = createSlider(0, 360, params.angle1);
-  sliders.angle1.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  sliders.angle1.parent(angle1Group);
   sliders.angle1.input(updateAndRedraw);
   
   // Angle 2
-  controlsOffsetY += 30;
-  labels.angle2 = createElement('label', 'Branch Rotation:').position(controlsOffsetX + 20, controlsOffsetY + 10);
+  let angle2Group = createDiv('');
+  angle2Group.class('control-group');
+  angle2Group.parent(coreSection);
+  
+  labels.angle2 = createElement('label', 'Branch Rotation:');
+  labels.angle2.parent(angle2Group);
+  
   sliders.angle2 = createSlider(0, 360, params.angle2);
-  sliders.angle2.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  sliders.angle2.parent(angle2Group);
   sliders.angle2.input(updateAndRedraw);
   
   // Branches
-  controlsOffsetY += 30;
-  labels.branches = createElement('label', 'No. ofBranches:').position(controlsOffsetX + 20, controlsOffsetY + 10);
-  sliders.branches = createSlider(2, 5, params.branches, 1); // Minimum braches are 2 to allow the use of two angles
-  sliders.branches.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  let branchesGroup = createDiv('');
+  branchesGroup.class('control-group');
+  branchesGroup.parent(coreSection);
+  
+  labels.branches = createElement('label', 'No. of Branches:');
+  labels.branches.parent(branchesGroup);
+  
+  sliders.branches = createSlider(2, 5, params.branches, 1);
+  sliders.branches.parent(branchesGroup);
   sliders.branches.input(() => {
     params.branches = sliders.branches.value();
     updateAndRedraw();
   });
   
   // ===== SIZE CONTROLS =====
-  controlsOffsetY += 40;
-  labels.heading2 = createElement('h3', 'Size Controls').style('font-weight', 'bold').position(controlsOffsetX + 20, controlsOffsetY + 0);
+  let sizeSection = createDiv('');
+  sizeSection.parent(controlsContainer);
+  
+  labels.heading2 = createElement('h3', 'Size Controls');
+  labels.heading2.parent(sizeSection);
   
   // Start Length
-  controlsOffsetY += 30;
-  labels.startLength = createElement('label', 'Start Length:').position(controlsOffsetX + 20, controlsOffsetY + 10);
+  let startLengthGroup = createDiv('');
+  startLengthGroup.class('control-group');
+  startLengthGroup.parent(sizeSection);
+  
+  labels.startLength = createElement('label', 'Start Length:');
+  labels.startLength.parent(startLengthGroup);
+  
   sliders.startLength = createSlider(10, 200, params.startLength);
-  sliders.startLength.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  sliders.startLength.parent(startLengthGroup);
   sliders.startLength.input(updateAndRedraw);
   
   // Length Multiplier
-  controlsOffsetY += 30;
-  labels.lengthMult = createElement('label', 'Length Mult:').position(controlsOffsetX + 20, controlsOffsetY + 10);
+  let lengthMultGroup = createDiv('');
+  lengthMultGroup.class('control-group');
+  lengthMultGroup.parent(sizeSection);
+  
+  labels.lengthMult = createElement('label', 'Length Mult:');
+  labels.lengthMult.parent(lengthMultGroup);
+  
   sliders.lengthMult = createSlider(0.1, 0.9, params.lengthMult, 0.01);
-  sliders.lengthMult.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  sliders.lengthMult.parent(lengthMultGroup);
   sliders.lengthMult.input(updateAndRedraw);
   
   // Start Width
-  controlsOffsetY += 30;
-  labels.startWidth = createElement('label', 'Start Width:').position(controlsOffsetX + 20, controlsOffsetY + 10);
+  let startWidthGroup = createDiv('');
+  startWidthGroup.class('control-group');
+  startWidthGroup.parent(sizeSection);
+  
+  labels.startWidth = createElement('label', 'Start Width:');
+  labels.startWidth.parent(startWidthGroup);
+  
   sliders.startWidth = createSlider(1, 20, params.startWidth);
-  sliders.startWidth.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  sliders.startWidth.parent(startWidthGroup);
   sliders.startWidth.input(updateAndRedraw);
   
   // Width Multiplier
-  controlsOffsetY += 30;
-  labels.widthMult = createElement('label', 'Width Mult:').position(controlsOffsetX + 20, controlsOffsetY + 10);
+  let widthMultGroup = createDiv('');
+  widthMultGroup.class('control-group');
+  widthMultGroup.parent(sizeSection);
+  
+  labels.widthMult = createElement('label', 'Width Mult:');
+  labels.widthMult.parent(widthMultGroup);
+  
   sliders.widthMult = createSlider(0.1, 0.9, params.widthMult, 0.01);
-  sliders.widthMult.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  sliders.widthMult.parent(widthMultGroup);
   sliders.widthMult.input(updateAndRedraw);
   
   // ===== ENHANCEMENTS =====
-  controlsOffsetY += 40;
-  labels.heading3 = createElement('h3', 'Enhancements').style('font-weight', 'bold').position(controlsOffsetX + 20, controlsOffsetY + 0);
+  let enhancementsSection = createDiv('');
+  enhancementsSection.parent(controlsContainer);
+  
+  labels.heading3 = createElement('h3', 'Enhancements');
+  labels.heading3.parent(enhancementsSection);
   
   // Recursion Depth
-  controlsOffsetY += 30;
-  labels.depth = createElement('label', 'Depth:').position(controlsOffsetX + 20, controlsOffsetY + 10);
+  let depthGroup = createDiv('');
+  depthGroup.class('control-group');
+  depthGroup.parent(enhancementsSection);
+  
+  labels.depth = createElement('label', 'Depth:');
+  labels.depth.parent(depthGroup);
+  
   sliders.depth = createSlider(1, 15, params.depth, 1);
-  sliders.depth.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  sliders.depth.parent(depthGroup);
   sliders.depth.input(updateAndRedraw);
   
   // Randomness
-  controlsOffsetY += 30;
-  labels.randomness = createElement('label', 'Randomness:').position(controlsOffsetX + 20, controlsOffsetY + 10);
+  let randomnessGroup = createDiv('');
+  randomnessGroup.class('control-group');
+  randomnessGroup.parent(enhancementsSection);
+  
+  labels.randomness = createElement('label', 'Randomness:');
+  labels.randomness.parent(randomnessGroup);
+  
   sliders.randomness = createSlider(0, 1, params.randomness, 0.01);
-  sliders.randomness.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  sliders.randomness.parent(randomnessGroup);
   sliders.randomness.input(updateAndRedraw);
   
   // Color Variation Mode
-  controlsOffsetY += 30;
-  labels.colorVariation = createElement('label', 'Color Variation:').position(controlsOffsetX + 20, controlsOffsetY + 10);
+  let colorVarGroup = createDiv('');
+  colorVarGroup.class('control-group');
+  colorVarGroup.parent(enhancementsSection);
+  
+  labels.colorVariation = createElement('label', 'Color Variation:');
+  labels.colorVariation.parent(colorVarGroup);
+  
+  let colorVarCheckboxContainer = createDiv('');
+  colorVarCheckboxContainer.class('checkbox-container');
+  colorVarCheckboxContainer.parent(colorVarGroup);
+  
   checkboxes.colorVariation = createCheckbox('', params.colorVariation);
-  checkboxes.colorVariation.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  checkboxes.colorVariation.parent(colorVarCheckboxContainer);
+  if (params.colorVariation) {
+    colorVarCheckboxContainer.addClass('active');
+  }
   checkboxes.colorVariation.changed(() => {
     params.colorVariation = checkboxes.colorVariation.checked();
+    if (params.colorVariation) {
+      colorVarCheckboxContainer.addClass('active');
+    } else {
+      colorVarCheckboxContainer.removeClass('active');
+    }
     updateUI();
     redraw();
   });
   
-  // Solid Color Controls (visible by default)
-  controlsOffsetY += 30;
-  labels.solidHue = createElement('label', 'Hue:').position(controlsOffsetX + 20, controlsOffsetY + 10);
+  // Color controls container
+  let colorControlsSection = createDiv('');
+  colorControlsSection.parent(enhancementsSection);
+  
+  // Solid Color Controls
+  let solidColorControls = createDiv('');
+  solidColorControls.class('solid-color-controls');
+  solidColorControls.parent(colorControlsSection);
+  
+  // Solid Hue
+  let solidHueGroup = createDiv('');
+  solidHueGroup.class('control-group');
+  solidHueGroup.parent(solidColorControls);
+  
+  labels.solidHue = createElement('label', 'Hue:');
+  labels.solidHue.parent(solidHueGroup);
+  
   sliders.solidHue = createSlider(0, 360, params.solidHue);
-  sliders.solidHue.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  sliders.solidHue.parent(solidHueGroup);
   sliders.solidHue.input(() => {
     params.solidHue = sliders.solidHue.value();
     redraw();
   });
 
-  controlsOffsetY += 30;
-  labels.solidSat = createElement('label', 'Saturation:').position(controlsOffsetX + 20, controlsOffsetY + 10);
+  // Solid Saturation
+  let solidSatGroup = createDiv('');
+  solidSatGroup.class('control-group');
+  solidSatGroup.parent(solidColorControls);
+  
+  labels.solidSat = createElement('label', 'Saturation:');
+  labels.solidSat.parent(solidSatGroup);
+  
   sliders.solidSat = createSlider(0, 100, params.solidSat);
-  sliders.solidSat.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  sliders.solidSat.parent(solidSatGroup);
   sliders.solidSat.input(() => {
     params.solidSat = sliders.solidSat.value();
     redraw();
   });
 
-  controlsOffsetY += 30;
-  labels.solidBright = createElement('label', 'Brightness:').position(controlsOffsetX + 20, controlsOffsetY + 10);
+  // Solid Brightness
+  let solidBrightGroup = createDiv('');
+  solidBrightGroup.class('control-group');
+  solidBrightGroup.parent(solidColorControls);
+  
+  labels.solidBright = createElement('label', 'Brightness:');
+  labels.solidBright.parent(solidBrightGroup);
+  
   sliders.solidBright = createSlider(0, 100, params.solidBright);
-  sliders.solidBright.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  sliders.solidBright.parent(solidBrightGroup);
   sliders.solidBright.input(() => {
     params.solidBright = sliders.solidBright.value();
     redraw();
   });
   
-  // Color Variation Controls (hidden by default)
-  controlsOffsetY += 30;
-  labels.hue = createElement('label', 'Base Hue:').position(controlsOffsetX + 20, controlsOffsetY + 10);
+  // Color Variation Controls
+  let variationColorControls = createDiv('');
+  variationColorControls.class('color-variation-controls');
+  variationColorControls.parent(colorControlsSection);
+  
+  // Base Hue
+  let hueGroup = createDiv('');
+  hueGroup.class('control-group');
+  hueGroup.parent(variationColorControls);
+  
+  labels.hue = createElement('label', 'Base Hue:');
+  labels.hue.parent(hueGroup);
+  
   sliders.hue = createSlider(0, 360, params.hue);
-  sliders.hue.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  sliders.hue.parent(hueGroup);
   sliders.hue.input(updateAndRedraw);
   
-  controlsOffsetY += 30;
-  labels.hueVariation = createElement('label', 'Hue Spread:').position(controlsOffsetX + 20, controlsOffsetY + 10);
+  // Hue Variation
+  let hueVarGroup = createDiv('');
+  hueVarGroup.class('control-group');
+  hueVarGroup.parent(variationColorControls);
+  
+  labels.hueVariation = createElement('label', 'Hue Spread:');
+  labels.hueVariation.parent(hueVarGroup);
+  
   sliders.hueVariation = createSlider(0, 180, params.hueVariation);
-  sliders.hueVariation.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  sliders.hueVariation.parent(hueVarGroup);
   sliders.hueVariation.input(updateAndRedraw);
   
-  // Branch Gradient Toggle
-  controlsOffsetY += 30;
-  labels.branchGradient = createElement('label', 'Branch Gradient:').position(controlsOffsetX + 20, controlsOffsetY + 10);
+  // Branch Gradient
+  let branchGradientGroup = createDiv('');
+  branchGradientGroup.class('control-group');
+  branchGradientGroup.parent(variationColorControls);
+  
+  labels.branchGradient = createElement('label', 'Branch Gradient:');
+  labels.branchGradient.parent(branchGradientGroup);
+  
+  let branchGradientCheckboxContainer = createDiv('');
+  branchGradientCheckboxContainer.class('checkbox-container');
+  branchGradientCheckboxContainer.parent(branchGradientGroup);
+  
   checkboxes.branchGradient = createCheckbox('', params.branchGradient);
-  checkboxes.branchGradient.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  checkboxes.branchGradient.parent(branchGradientCheckboxContainer);
+  if (params.branchGradient) {
+    branchGradientCheckboxContainer.addClass('active');
+  }
   checkboxes.branchGradient.changed(() => {
     params.branchGradient = checkboxes.branchGradient.checked();
+    if (params.branchGradient) {
+      branchGradientCheckboxContainer.addClass('active');
+    } else {
+      branchGradientCheckboxContainer.removeClass('active');
+    }
     redraw();
   });
   
-  // Dark Colors Toggle
-  controlsOffsetY += 30;
-  labels.darkColors = createElement('label', 'Dark Colors:').position(controlsOffsetX + 20, controlsOffsetY + 10);
+  // Dark Colors
+  let darkColorsGroup = createDiv('');
+  darkColorsGroup.class('control-group');
+  darkColorsGroup.parent(variationColorControls);
+  
+  labels.darkColors = createElement('label', 'Dark Colors:');
+  labels.darkColors.parent(darkColorsGroup);
+  
+  let darkColorsCheckboxContainer = createDiv('');
+  darkColorsCheckboxContainer.class('checkbox-container');
+  darkColorsCheckboxContainer.parent(darkColorsGroup);
+  
   checkboxes.darkColors = createCheckbox('', params.darkColors);
-  checkboxes.darkColors.position(controlsOffsetX + 150, controlsOffsetY + 10);
+  checkboxes.darkColors.parent(darkColorsCheckboxContainer);
+  if (params.darkColors) {
+    darkColorsCheckboxContainer.addClass('active');
+  }
   checkboxes.darkColors.changed(() => {
     params.darkColors = checkboxes.darkColors.checked();
+    if (params.darkColors) {
+      darkColorsCheckboxContainer.addClass('active');
+    } else {
+      darkColorsCheckboxContainer.removeClass('active');
+    }
     redraw();
   });
   
   // ===== CONTROLS =====
-  controlsOffsetY += 40;
+  let controlsButtonSection = createDiv('');
+  controlsButtonSection.parent(controlsContainer);
+  
   // Randomize button
   let randomizeBtn = createButton('Randomize All');
-  randomizeBtn.position(controlsOffsetX + 20, controlsOffsetY + 10);
+  randomizeBtn.parent(controlsButtonSection);
   randomizeBtn.mousePressed(randomizeParams);
   
   // Initial UI setup
@@ -219,38 +365,19 @@ function updateParams() {
 }
 
 function updateUI() {
-  // Show/hide controls based on color variation mode
-  const isVariation = params.colorVariation;
+  // Toggle color-variation-active class on controlsContainer based on colorVariation mode
+  if (params.colorVariation) {
+    controlsContainer.addClass('color-variation-active');
+  } else {
+    controlsContainer.removeClass('color-variation-active');
+  }
   
-  // Update solid color controls visibility
-  sliders.solidHue.elt.style.display = isVariation ? 'none' : 'block';
-  labels.solidHue.elt.style.display = isVariation ? 'none' : 'block';
-  sliders.solidSat.elt.style.display = isVariation ? 'none' : 'block';
-  labels.solidSat.elt.style.display = isVariation ? 'none' : 'block';
-  sliders.solidBright.elt.style.display = isVariation ? 'none' : 'block';
-  labels.solidBright.elt.style.display = isVariation ? 'none' : 'block';
-  
-  // Update color variation controls visibility and position
-  sliders.hue.elt.style.display = isVariation ? 'block' : 'none';
-  labels.hue.elt.style.display = isVariation ? 'block' : 'none';
-  sliders.hueVariation.elt.style.display = isVariation ? 'block' : 'none';
-  labels.hueVariation.elt.style.display = isVariation ? 'block' : 'none';
-  checkboxes.branchGradient.elt.style.display = isVariation ? 'block' : 'none';
-  labels.branchGradient.elt.style.display = isVariation ? 'block' : 'none';
-  checkboxes.darkColors.elt.style.display = isVariation ? 'block' : 'none';
-  labels.darkColors.elt.style.display = isVariation ? 'block' : 'none';
-  
-  if (isVariation) {
-    // Color variation controls being positioned in the same space as the invisible solid color controls
-    let baseY = checkboxes.colorVariation.y + 30;
-    labels.hue.position(controlsOffsetX + 20, baseY + 10);
-    sliders.hue.position(controlsOffsetX + 150, baseY + 10);
-    labels.hueVariation.position(controlsOffsetX + 20, baseY + 40);
-    sliders.hueVariation.position(controlsOffsetX + 150, baseY + 40);
-    labels.branchGradient.position(controlsOffsetX + 20, baseY + 70);
-    checkboxes.branchGradient.position(controlsOffsetX + 150, baseY + 70);
-    labels.darkColors.position(controlsOffsetX + 20, baseY + 100);
-    checkboxes.darkColors.position(controlsOffsetX + 150, baseY + 100);
+  // Update active state for colorVariation checkbox container
+  const colorVarCheckboxContainer = checkboxes.colorVariation.elt.parentElement;
+  if (params.colorVariation) {
+    colorVarCheckboxContainer.classList.add('active');
+  } else {
+    colorVarCheckboxContainer.classList.remove('active');
   }
 }
 
@@ -383,6 +510,29 @@ function randomizeParams() {
   sliders.hueVariation.value(params.hueVariation);
   checkboxes.branchGradient.checked(params.branchGradient);
   checkboxes.darkColors.checked(params.darkColors);
+  
+  // Update active classes for checkbox containers
+  const colorVarContainer = checkboxes.colorVariation.elt.parentElement;
+  const branchGradientContainer = checkboxes.branchGradient.elt.parentElement;
+  const darkColorsContainer = checkboxes.darkColors.elt.parentElement;
+  
+  if (params.colorVariation) {
+    colorVarContainer.classList.add('active');
+  } else {
+    colorVarContainer.classList.remove('active');
+  }
+  
+  if (params.branchGradient) {
+    branchGradientContainer.classList.add('active');
+  } else {
+    branchGradientContainer.classList.remove('active');
+  }
+  
+  if (params.darkColors) {
+    darkColorsContainer.classList.add('active');
+  } else {
+    darkColorsContainer.classList.remove('active');
+  }
   
   updateUI();
   redraw();
