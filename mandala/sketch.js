@@ -309,8 +309,8 @@ function drawMandalaLayer(j, numLayers, numPetals, petalAngle, halfCanvasSize, l
   // Apply current opacity value
   fill(hue, sat, brt, opacityValue);
   
-  // Handle rotation in animated mode
-  if (isAnimating && doRotation) {
+  // Handle rotation in animated mode - now apply rotation regardless of doRotation flag
+  if (isAnimating) {
     push();
     rotate(rotationAngle * (1 - layerProgress * 0.5));
   }
@@ -331,7 +331,7 @@ function drawMandalaLayer(j, numLayers, numPetals, petalAngle, halfCanvasSize, l
   }
   
   // End rotation transform if we used it
-  if (isAnimating && doRotation) {
+  if (isAnimating) {
     pop();
   }
   
@@ -420,6 +420,7 @@ let lastPulseOpacity = 50; // Store the last opacity value when pulse was active
 let scaleSpeed = 0.5;
 let currentScale = 1.0;
 let lastScale = 1.0; // Store the last scale value when scale animation is disabled
+let lastRotationAngle = 0; // Store the last rotation angle when rotation is disabled
 
 let minPetalsValue = 10, maxPetalsValue = 30, defaultPetalsValue = 20;
 let minLayersValue = 3, maxLayersValue = 30, defaultLayersValue = 15;
@@ -556,6 +557,18 @@ function setup() {
   rotationCheckbox = rotationControl.checkbox;
   rotationSpeedSlider = rotationControl.slider;
 
+  // Add event listener for rotation checkbox
+  rotationCheckbox.changed(() => {
+    if (!rotationCheckbox.checked()) {
+      // Store the current rotation angle when disabling rotation
+      lastRotationAngle = rotationAngle;
+      console.log("Rotation disabled, saving angle:", lastRotationAngle);
+    } else {
+      // When re-enabling, continue from the last angle
+      console.log("Rotation enabled, starting from angle:", lastRotationAngle);
+    }
+  });
+
   let colorShiftControl = createAnimationControl(animationControlsContainer, 'Color Shift', true, 0.5);
   colorShiftCheckbox = colorShiftControl.checkbox;
   colorShiftSpeedSlider = colorShiftControl.slider;
@@ -614,7 +627,11 @@ function newArt() {
   
   // Reset animation parameters
   animationFrame = 0;
-  rotationAngle = 0;
+  // Only reset rotationAngle if animation is not active
+  if (!isAnimating) {
+    rotationAngle = 0;
+    lastRotationAngle = 0;
+  }
   scaleStartFrame = frameCount;
   
   // Reset scale values
@@ -716,7 +733,13 @@ function draw() {
 
   // Update rotation angle if rotation is enabled
   if (doRotation) {
+    // Only increment the rotation when rotation is enabled
     rotationAngle += rotationSpeed;
+    lastRotationAngle = rotationAngle;
+  } else {
+    // When rotation is disabled, keep using the last rotation angle
+    // but don't increment it
+    rotationAngle = lastRotationAngle; 
   }
 
   // Calculate scale if enabled
