@@ -38,6 +38,7 @@ canvas {
 .control-panel {
   position: relative;
   width: 220px;
+  height: 100%; /* Match the canvas height */
   max-height: 90vh;
   overflow-y: auto;
   padding: 10px;
@@ -46,6 +47,13 @@ canvas {
   border: 1px solid #000000;
   border-radius: 8px; /* Rounded edges */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+
+
+}
+
+.control-panel > * {
+  margin: 0;
+  padding: 0;
 }
 
 /* Canvas container */
@@ -54,11 +62,21 @@ canvas {
   display: flex;
   justify-content: center;
   align-items: center;
+  height: 100%; /* Ensure the container takes full height */
 }
 
 /* Left control panel */
 .control-panel-left {
   order: 1;
+
+    /* Even the spacing between children */
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+  
+    /* gap: 10px; */
+    /* align-items: stretch; */
+    /* overflow-y: auto; Prevent overflow by enabling scrolling */
 }
 
 /* Canvas container */
@@ -69,42 +87,30 @@ canvas {
 /* Right control panel */
 .control-panel-right {
   order: 3;
+
+  /* background-color: #000; */
+  
+  /* Even the spacing between children */
+  display: flex;
+  flex-direction: column;
+  /* justify-content: space-between; */
+  gap: 1%;
+
+  /* gap: 10px; */
+  /* align-items: stretch; */
+  /* overflow-y: auto; Prevent overflow by enabling scrolling */
 }
 
-/* Responsive design for smaller screens */
-@media screen and (max-width: 900px) {
-  body {
-    flex-direction: column;
-    overflow-y: auto;
-    height: auto;
-    min-height: 100vh;
-  }
-  
-  .control-panel {
-    width: 90%;
-    max-width: 400px;
-    max-height: none;
-    overflow-y: visible;
-  }
-  
-  .control-panel-left {
-    order: 1;
-  }
-  
-  .canvas-container {
-    order: 2;
-    margin: 20px 0;
-  }
-  
-  .control-panel-right {
-    order: 3;
-  }
+.control-panel-right > *:last-child {
+  margin-top: auto;
 }
 
 /* Slider and label styling */
 .slider-container {
-  margin: 10px 0;
+  margin: 5px 0;
   padding: 10px;
+  /* margin: 5px 0 !important;
+  padding: 5px !important; */
   background-color: #ffffff;
   border: 1px solid #000000;
   border-radius: 8px; /* Rounded edges */
@@ -286,3 +292,6 @@ select {
   /* font-weight: bold; */
   min-width: 80px;
 }
+
+/* Adapt to smaller screens */
+/* Not yet implemented */
