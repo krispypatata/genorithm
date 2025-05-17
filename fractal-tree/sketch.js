@@ -88,6 +88,7 @@ function setup() {
   
   // ===== CORE PARAMETERS =====
   let coreSection = createDiv('');
+  coreSection.class('core-controls');
   // coreSection.parent(controlsContainer);
   coreSection.parent('left-panel');
   
@@ -135,6 +136,7 @@ function setup() {
   
   // ===== SIZE CONTROLS =====
   let sizeSection = createDiv('');
+  sizeSection.class('size-controls');
   // sizeSection.parent(controlsContainer);
   sizeSection.parent('left-panel');
   
@@ -191,6 +193,7 @@ function setup() {
   
   // ===== ENHANCEMENTS =====
   let enhancementsSection = createDiv('');
+  enhancementsSection.class('enhancements-controls');
   // enhancementsSection.parent(controlsContainer);
   enhancementsSection.parent('right-panel');
   
@@ -223,17 +226,17 @@ function setup() {
   
   // Color Variation Mode
   let colorVarGroup = createDiv('');
-  colorVarGroup.class('control-group');
+  // colorVarGroup.class('control-group');
   colorVarGroup.parent(enhancementsSection);
   
-  labels.colorVariation = createElement('label', 'Color Variation:');
-  labels.colorVariation.parent(colorVarGroup);
+  // labels.colorVariation = createElement('label', 'Color Variation:');
+  // labels.colorVariation.parent(colorVarGroup);
   
   let colorVarCheckboxContainer = createDiv('');
   colorVarCheckboxContainer.class('checkbox-container');
   colorVarCheckboxContainer.parent(colorVarGroup);
   
-  checkboxes.colorVariation = createCheckbox('', params.colorVariation);
+  checkboxes.colorVariation = createCheckbox('Color Variation', params.colorVariation);
   checkboxes.colorVariation.parent(colorVarCheckboxContainer);
   if (params.colorVariation) {
     colorVarCheckboxContainer.addClass('active');
@@ -337,14 +340,14 @@ function setup() {
   branchGradientGroup.class('control-group');
   branchGradientGroup.parent(variationColorControls);
   
-  labels.branchGradient = createElement('label', 'Branch Gradient:');
-  labels.branchGradient.parent(branchGradientGroup);
+  // labels.branchGradient = createElement('label', 'Branch Gradient:');
+  // labels.branchGradient.parent(branchGradientGroup);
   
   let branchGradientCheckboxContainer = createDiv('');
   branchGradientCheckboxContainer.class('checkbox-container');
   branchGradientCheckboxContainer.parent(branchGradientGroup);
   
-  checkboxes.branchGradient = createCheckbox('', params.branchGradient);
+  checkboxes.branchGradient = createCheckbox('Branch Gradient', params.branchGradient);
   checkboxes.branchGradient.parent(branchGradientCheckboxContainer);
   if (params.branchGradient) {
     branchGradientCheckboxContainer.addClass('active');
@@ -364,14 +367,14 @@ function setup() {
   darkColorsGroup.class('control-group');
   darkColorsGroup.parent(variationColorControls);
   
-  labels.darkColors = createElement('label', 'Dark Colors:');
-  labels.darkColors.parent(darkColorsGroup);
+  // labels.darkColors = createElement('label', 'Dark Colors:');
+  // labels.darkColors.parent(darkColorsGroup);
   
   let darkColorsCheckboxContainer = createDiv('');
   darkColorsCheckboxContainer.class('checkbox-container');
   darkColorsCheckboxContainer.parent(darkColorsGroup);
   
-  checkboxes.darkColors = createCheckbox('', params.darkColors);
+  checkboxes.darkColors = createCheckbox('Dark Colors', params.darkColors);
   checkboxes.darkColors.parent(darkColorsCheckboxContainer);
   if (params.darkColors) {
     darkColorsCheckboxContainer.addClass('active');
