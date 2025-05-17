@@ -118,7 +118,7 @@ canvas {
 
 .slider-container .label {
   margin: 0 0 8px 0;
-  font-weight: bold;
+  /* font-weight: bold; */
   color: #000000;
 }
 
