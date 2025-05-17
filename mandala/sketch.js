@@ -574,6 +574,20 @@ function setup() {
     alphaSlider.attribute('disabled', '');
   }
 
+  // Spacing control
+  let overlapControl = createSliderContainer(leftPanel, "Spacing", 0, 100, 50);
+  overlapSlider = overlapControl.slider;
+  
+  // Update the label to use descriptive text
+  const getSpacingLabel = (value) => {
+    return value < 33 ? "Dense" : value < 66 ? "Medium" : "Spread";
+  };
+  
+  overlapControl.label.html(`Spacing: ${getSpacingLabel(50)}`);
+  overlapSlider.input(() => {
+    overlapControl.label.html(`Spacing: ${getSpacingLabel(overlapSlider.value())}`);
+  });
+
   // Outlines
   let outlineContainer = createDiv('');
   outlineContainer.class('slider-container');
@@ -606,20 +620,6 @@ function setup() {
   styleDropdown.option('random');
   styleDropdown.selected('random');
   styleDropdown.changed(styleChanged);
-
-  // Overlaps
-  let overlapControl = createSliderContainer(rightPanel, "Spacing", 0, 100, 50);
-  overlapSlider = overlapControl.slider;
-  
-  // Update the label to use descriptive text
-  const getSpacingLabel = (value) => {
-    return value < 33 ? "Dense" : value < 66 ? "Medium" : "Spread";
-  };
-  
-  overlapControl.label.html(`Spacing: ${getSpacingLabel(50)}`);
-  overlapSlider.input(() => {
-    overlapControl.label.html(`Spacing: ${getSpacingLabel(overlapSlider.value())}`);
-  });
 
   // Control buttons
   let buttonContainer = createDiv('');
