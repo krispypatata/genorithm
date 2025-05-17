@@ -9,9 +9,9 @@
   <body>
     <div class="container">
       <div class="sidebar">
-        <h2>Genorithm</h2>
+        <h2 class="logo" onclick="switchProject('about')">Genorithm</h2>
         <button
-          class="nav-button active"
+          class="nav-button"
           onclick="switchProject('fractal-tree')"
         >
           Fractal Tree
@@ -22,8 +22,13 @@
       </div>
       <div class="content">
         <iframe
-          id="fractal-tree-frame"
+          id="about-frame"
           class="project-frame active"
+          src="about/index.html"
+        ></iframe>
+        <iframe
+          id="fractal-tree-frame"
+          class="project-frame"
           src="fractal-tree/index.html"
         ></iframe>
         <iframe
@@ -48,7 +53,11 @@
         document.querySelectorAll(".nav-button").forEach((button) => {
           button.classList.remove("active");
         });
-        event.target.classList.add("active");
+        
+        // Only add active class to buttons, not the logo
+        if (event.target.classList.contains('nav-button')) {
+          event.target.classList.add("active");
+        }
       }
     </script>
   </body>
