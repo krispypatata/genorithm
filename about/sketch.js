@@ -250,7 +250,7 @@ let mousePath = [];
 let maxPathLength = 10;
 
 function setup() {
-  createCanvas(windowWidth, windowHeight);
+  createCanvas(windowWidth, windowHeight/2);
   rectMode(CENTER);
   angleMode(DEGREES);
   frameRate(60); // Ensure smooth frame rate
@@ -272,7 +272,7 @@ function createBlocks() {
 }
 
 function windowResized() {
-  resizeCanvas(windowWidth, windowHeight);
+  resizeCanvas(windowWidth, windowHeight/2);
   cols = floor(width/size);
   rows = floor(height/size);
   createBlocks();
