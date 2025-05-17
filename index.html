@@ -9,7 +9,7 @@
   <body>
     <div class="container">
       <div class="sidebar">
-        <h2 class="logo" onclick="switchProject('about')">genorithm</h2>
+        <h2 class="logo"><span></span></h2>
         <button
           class="nav-button"
           onclick="switchProject('fractal-tree')"
@@ -59,6 +59,52 @@
           event.target.classList.add("active");
         }
       }
+    </script>
+
+    <script>
+      const logoSpan = document.querySelector('.logo span');
+      const phrases = ['genorithm', 'math 10'];
+      const typingSpeed = 75; // Milliseconds per character
+      const phrase1_duration = 6000; // Milliseconds to display 'genorithm'
+      const phrase2_duration = 3000; // Milliseconds to display 'math 10'
+
+      let phraseIndex = 0;
+      let charIndex = 0;
+
+      function typeCharacter() {
+        if (charIndex < phrases[phraseIndex].length) {
+          logoSpan.textContent += phrases[phraseIndex].charAt(charIndex);
+          charIndex++;
+          setTimeout(typeCharacter, typingSpeed);
+        } else {
+          // Finished typing, wait before deleting or switching
+          const delay = phraseIndex === 0 ? phrase1_duration : phrase2_duration;
+          setTimeout(startDeletion, delay);
+        }
+      }
+
+      function startDeletion() {
+        // To show blinking cursor while waiting to delete, remove the typing animation
+        setTimeout(deleteCharacter, typingSpeed / 2); // Delete faster
+      }
+
+      function deleteCharacter() {
+        if (charIndex > 0) {
+          logoSpan.textContent = phrases[phraseIndex].substring(0, charIndex - 1);
+          charIndex--;
+          setTimeout(deleteCharacter, typingSpeed / 2);
+        } else {
+          // Finished deleting, switch phrase and start typing
+          phraseIndex = (phraseIndex + 1) % phrases.length;
+          setTimeout(typeCharacter, typingSpeed);
+        }
+      }
+
+      // Initial call to start the animation
+      document.addEventListener('DOMContentLoaded', () => {
+          typeCharacter();
+      });
+
     </script>
   </body>
 </html>
