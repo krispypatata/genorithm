@@ -13,6 +13,7 @@ class Block {
     this.shapeType = floor(random(4)); // Random shape type (0-3)
     this.nextShapeType = this.shapeType; // Next shape to transition to
     this.morphProgress = 0; // Progress of morphing between shapes
+    this.isTextBlock = false; // Whether this block is part of the text
   }
 
   display() {
@@ -21,15 +22,26 @@ class Block {
     // Always draw a shape regardless of animation state
     if (this.activated) {
       // For activated blocks, use the animation opacity with minimum value
-      const validOpacity = constrain(this.opacity, 60, 180); // Reduced max opacity from 255 to 180
-      stroke(this.c, this.c, this.c, validOpacity);
-      strokeWeight(1.5); // Slightly thicker lines for active blocks
+      const validOpacity = constrain(this.opacity, 60, 180);
       
-      // Fill with very low opacity for active blocks
-      fill(this.c, this.c, this.c, validOpacity * 0.15); // Reduced fill multiplier from 0.2 to 0.15
+      if (this.isTextBlock) {
+        // Much brighter appearance for activated text blocks
+        stroke(230, 230, 230, validOpacity);
+        strokeWeight(1.5);
+        fill(230, 230, 230, validOpacity * 0.25);
+      } else {
+        stroke(this.c, this.c, this.c, validOpacity);
+        strokeWeight(1.5);
+        fill(this.c, this.c, this.c, validOpacity * 0.15);
+      }
+    } else if (this.isTextBlock) {
+      // Brighter styling for text blocks at rest
+      stroke(220, 220, 220, 180);
+      strokeWeight(1.2);
+      fill(220, 220, 220, 50);
     } else {
       // For background grid, use a fixed low opacity
-      stroke(80, 80, 80, 70); // Increased from 40 to 70 opacity, and color from 70 to 80
+      stroke(80, 80, 80, 70);
       strokeWeight(0.8);
       noFill();
     }
@@ -248,6 +260,7 @@ let rows;
 let mouseIsMoving = false;
 let mousePath = [];
 let maxPathLength = 10;
+let textGraphic; // Buffer for text detection
 
 function setup() {
   createCanvas(windowWidth, windowHeight/2);
@@ -258,7 +271,113 @@ function setup() {
   cols = floor(width/size);
   rows = floor(height/size);
 
+  // Create text graphic first to ensure it's available for block initialization
+  createTextGraphic();
   createBlocks();
+}
+
+// Create a graphics buffer with the text to detect which blocks should be highlighted
+function createTextGraphic() {
+  textGraphic = createGraphics(width, height);
+  textGraphic.background(0);
+  
+  // Define a bitmap-style representation for each letter with consistent thickness
+  // 1 = pixel on, 0 = pixel off
+  const letterPatterns = {
+    'G': [
+      [1,1,1,1,1],
+      [1,0,0,0,0],
+      [1,0,1,1,1],
+      [1,0,0,0,1],
+      [1,1,1,1,1]
+    ],
+    'E': [
+      [1,1,1,1,1],
+      [1,0,0,0,0],
+      [1,1,1,0,0],
+      [1,0,0,0,0],
+      [1,1,1,1,1]
+    ],
+    'N': [
+      [1,0,0,0,1],
+      [1,1,0,0,1],
+      [1,0,1,0,1],
+      [1,0,0,1,1],
+      [1,0,0,0,1]
+    ],
+    'O': [
+      [1,1,1,1,1],
+      [1,0,0,0,1],
+      [1,0,0,0,1],
+      [1,0,0,0,1],
+      [1,1,1,1,1]
+    ],
+    'R': [
+      [1,1,1,1,0],
+      [1,0,0,0,1],
+      [1,1,1,1,0],
+      [1,0,1,0,0],
+      [1,0,0,1,0]
+    ],
+    'I': [
+      [1,1,1,1,1],
+      [0,0,1,0,0],
+      [0,0,1,0,0],
+      [0,0,1,0,0],
+      [1,1,1,1,1]
+    ],
+    'T': [
+      [1,1,1,1,1],
+      [0,0,1,0,0],
+      [0,0,1,0,0],
+      [0,0,1,0,0],
+      [0,0,1,0,0]
+    ],
+    'H': [
+      [1,0,0,0,1],
+      [1,0,0,0,1],
+      [1,1,1,1,1],
+      [1,0,0,0,1],
+      [1,0,0,0,1]
+    ],
+    'M': [
+      [1,0,0,0,1],
+      [1,1,0,1,1],
+      [1,0,1,0,1],
+      [1,0,0,0,1],
+      [1,0,0,0,1]
+    ]
+  };
+  
+  // Calculate the pixel size based on canvas width
+  const word = "GENORITHM";
+  const pixelSize = max(width / (word.length * 8), 4);
+  
+  // Calculate the start position to center the text
+  const totalWidth = word.length * 6 * pixelSize; // 6 pixels wide per letter (5 + 1 space)
+  const startX = (width - totalWidth) / 2;
+  const startY = (height - 5 * pixelSize) / 2;
+  
+  // Draw each letter
+  textGraphic.fill(255);
+  textGraphic.noStroke();
+  
+  for (let charIndex = 0; charIndex < word.length; charIndex++) {
+    const letter = word[charIndex];
+    const pattern = letterPatterns[letter];
+    
+    if (pattern) {
+      for (let y = 0; y < pattern.length; y++) {
+        for (let x = 0; x < pattern[y].length; x++) {
+          if (pattern[y][x] === 1) {
+            const posX = startX + charIndex * 6 * pixelSize + x * pixelSize;
+            const posY = startY + y * pixelSize;
+            textGraphic.rect(posX, posY, pixelSize, pixelSize);
+          }
+        }
+      }
+    }
+  }
 }
 
 function createBlocks() {
@@ -267,14 +386,34 @@ function createBlocks() {
     blocks[i] = [];
     for (let j = 0; j < rows; j++) {
       blocks[i][j] = new Block(size / 2 + i * size, size / 2 + j * size);
+      
+      // Check if this block position falls within text area
+      const blockX = size / 2 + i * size;
+      const blockY = size / 2 + j * size;
+      
+      // Check if this block is part of the text
+      blocks[i][j].isTextBlock = isPositionInText(blockX, blockY);
     }
   }
+}
+
+// Check if a position is within the text area by sampling the text buffer
+function isPositionInText(x, y) {
+  if (!textGraphic) return false;
+  
+  // Simple sampling directly at the point
+  // This works better with the much larger text
+  const pixel = textGraphic.get(x, y);
+  
+  // Any non-black pixel is considered part of the text
+  return pixel[0] > 0;
 }
 
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight/2);
   cols = floor(width/size);
   rows = floor(height/size);
+  createTextGraphic(); // Recreate text buffer at new size
   createBlocks();
 }
 
