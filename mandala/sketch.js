@@ -14,9 +14,12 @@ function createSliderContainer(parentElement, labelText, min, max, defaultValue,
   label.class('label');
   label.parent(container);
   
+  let sliderWrapper = createDiv('');
+  sliderWrapper.class('slider-wrapper');
+  sliderWrapper.parent(container);
+  
   let slider = createSlider(min, max, defaultValue, step);
-  slider.parent(container);
-  slider.input(() => label.html(`${labelText}: ${slider.value()}`));
+  slider.parent(sliderWrapper);
   
   return { container, label, slider };
 }
@@ -41,8 +44,13 @@ function createAnimationControl(parentElement, labelText, defaultChecked = true,
   let checkbox = createCheckbox(labelText, defaultChecked);
   checkbox.parent(container);
   
+  // Create slider wrapper for better vertical layout
+  let sliderWrapper = createDiv('');
+  sliderWrapper.class('slider-wrapper');
+  sliderWrapper.parent(container);
+  
   let slider = createSlider(0, 2, defaultValue, 0.01);
-  slider.parent(container);
+  slider.parent(sliderWrapper);
   
   // Set initial slider state based on checkbox
   if (!defaultChecked) {
@@ -494,11 +502,13 @@ let curveStyleValues = curveStyleList.reduce((acc, style) => {
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
 // Sets up the canvas and creates all UI controls when the program starts
 function setup() {
-  // let size = min(windowWidth, windowHeight) - 110;
-  let size = 500;
+  // Calculate canvas size based on window dimensions
+  // Use the smaller of window width/height and leave space for controls
+  let size = calculateCanvasSize();
   let canvas = createCanvas(size, size);
   
-  // Canvas positioning now handled by CSS
+  // Place canvas in the canvas container
+  canvas.parent('canvas-container');
   
   halfCanvasSize = size / 2;
   angleMode(DEGREES);
@@ -522,15 +532,17 @@ function setup() {
   lastRotationAngle = 0;
   initialColors = [];
   
-  // Create a control panel div to contain all controls
-  let controlPanel = createDiv('');
-  controlPanel.class('control-panel');
+  // Create left control panel
+  let leftPanel = select('#left-panel');
   
-  let offsetY = 0;
+  // Create right control panel
+  let rightPanel = select('#right-panel');
 
   // CREATE UI using helper functions
+  // Left panel controls
+  
   // Petals
-  let petalControl = createSliderContainer(controlPanel, "No. of petals", minPetalsValue, maxPetalsValue, defaultPetalsValue, 2);
+  let petalControl = createSliderContainer(leftPanel, "No. of petals", minPetalsValue, maxPetalsValue, defaultPetalsValue, 2);
   petalSlider = petalControl.slider;
   
   randomPetalButton = createToggleButton(petalControl.container, "random", 'random', petalsRandom);
@@ -541,7 +553,7 @@ function setup() {
   }
   
   // Layers
-  let layersControl = createSliderContainer(controlPanel, "No. of layers", minLayersValue, maxLayersValue, defaultLayersValue);
+  let layersControl = createSliderContainer(leftPanel, "No. of layers", minLayersValue, maxLayersValue, defaultLayersValue);
   layersSlider = layersControl.slider;
   
   randomLayersButton = createToggleButton(layersControl.container, "random", 'random', layersRandom);
@@ -552,7 +564,7 @@ function setup() {
   }
 
   // Alpha (opacity)
-  let alphaControl = createSliderContainer(controlPanel, "Opacity", minOpacityValue, maxOpacityValue, defaultOpacityValue);
+  let alphaControl = createSliderContainer(leftPanel, "Opacity", minOpacityValue, maxOpacityValue, defaultOpacityValue);
   alphaSlider = alphaControl.slider;
   
   randomAlphaButton = createToggleButton(alphaControl.container, "random", 'random', alphaRandom);
@@ -565,17 +577,19 @@ function setup() {
   // Outlines
   let outlineContainer = createDiv('');
   outlineContainer.class('slider-container');
-  outlineContainer.parent(controlPanel);
+  outlineContainer.parent(leftPanel);
   
   outlineButton = createToggleButton(outlineContainer, "outline", 'outline', outline);
   noOutlineButton = createToggleButton(outlineContainer, "no outline", 'no-outline', noOutline);
   randOutButton = createToggleButton(outlineContainer, "random", 'rand-outline', randOutline);
   randOutline();
 
+  // Right panel controls
+  
   // Styles
   let styleContainer = createDiv('');
   styleContainer.class('slider-container');
-  styleContainer.parent(controlPanel);
+  styleContainer.parent(rightPanel);
   
   let styleLabel = createElement("p", "Style:");
   styleLabel.class('label');
@@ -594,7 +608,7 @@ function setup() {
   styleDropdown.changed(styleChanged);
 
   // Overlaps
-  let overlapControl = createSliderContainer(controlPanel, "Spacing", 0, 100, 50);
+  let overlapControl = createSliderContainer(rightPanel, "Spacing", 0, 100, 50);
   overlapSlider = overlapControl.slider;
   
   // Update the label to use descriptive text
@@ -610,19 +624,21 @@ function setup() {
   // Control buttons
   let buttonContainer = createDiv('');
   buttonContainer.class('slider-container');
-  buttonContainer.parent(controlPanel);
+  buttonContainer.parent(rightPanel);
   
-  newArtButton = createToggleButton(buttonContainer, "new art", 'new-art', newArt);
-  printButton = createToggleButton(buttonContainer, "save jpg", 'save-jpg', saveJpg);
   animateButton = createToggleButton(buttonContainer, "animate", 'animate', toggleAnimation);
 
   colorMode(HSB, 256, 100, 100, 100);
 
   // Animation controls container
+  let animationControlsWrapper = createDiv('');
+  animationControlsWrapper.class('animation-controls-wrapper');
+  animationControlsWrapper.parent(rightPanel);
+  
   let animationControlsContainer = createDiv('');
   animationControlsContainer.class('animation-controls');
   animationControlsContainer.id('animation-controls');
-  animationControlsContainer.parent(controlPanel);
+  animationControlsContainer.parent(animationControlsWrapper);
 
   // Create animation controls
   let rotationControl = createAnimationControl(animationControlsContainer, 'Rotation', true, 0.5);
@@ -689,7 +705,7 @@ function setup() {
       scaleSpeedSlider.attribute('disabled', '');
     } else {
       // When re-enabling scale animation, smoothly transition from current scale
-      // Calculate initial cycle based on current scale and direction
+      // calculate initial cycle based on current scale and direction
       if (isScaleGrowing) {
         initialScaleCycle = map(currentScale, 0.5, 1.5, 0, 90);
       } else {
@@ -708,8 +724,68 @@ function setup() {
     initialScaleCycle = currentCycle;
     scaleStartFrame = frameCount;
   });
+  
+  // Add main action buttons at the very end, after animation controls
+  let mainButtonsContainer = createDiv('');
+  mainButtonsContainer.class('main-buttons-container');
+  mainButtonsContainer.parent(rightPanel);
+  
+  newArtButton = createToggleButton(mainButtonsContainer, "new art", 'new-art', newArt);
+  printButton = createToggleButton(mainButtonsContainer, "save jpg", 'save-jpg', saveJpg);
 
   newArt();
+}
+
+// Calculate appropriate canvas size based on window dimensions
+function calculateCanvasSize() {
+  let controlPanelWidth = 220; // Width of each control panel
+  let padding = 40; // Additional padding
+  
+  // For wider screens - horizontal layout
+  if (windowWidth > 900) {
+    // Leave space for the control panels and padding
+    let availableWidth = windowWidth - (controlPanelWidth * 2) - padding;
+    let availableHeight = windowHeight - padding;
+    
+    // Use the smaller dimension to make sure everything fits
+    let size = min(availableWidth, availableHeight);
+    
+    // Set minimum and maximum sizes
+    size = constrain(size, 300, 800);
+    
+    return size;
+  } 
+  // For narrower screens - vertical layout
+  else {
+    // In vertical layout, we're constrained by width
+    let availableWidth = windowWidth - padding;
+    // Leave some space for controls above and below
+    let availableHeight = windowHeight - 400; 
+    
+    // Use the smaller dimension to make sure everything fits
+    let size = min(availableWidth, availableHeight);
+    
+    // Set minimum size
+    size = constrain(size, 250, 500);
+    
+    return size;
+  }
+}
+
+// Handle window resize events
+function windowResized() {
+  let newSize = calculateCanvasSize();
+  resizeCanvas(newSize, newSize);
+  halfCanvasSize = newSize / 2;
+  
+  // Reset and translate to center of canvas
+  resetMatrix();
+  translate(width / 2, height / 2);
+  
+  // Redraw the mandala with updated dimensions
+  if (!isAnimating) {
+    newArt();
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
@@ -941,7 +1017,8 @@ function draw() {
     petalAngle = 360 / numPetals;
   }
   
-  if (!layerCushion) {
+  // Recalculate layerCushion based on current canvas size
+  if (!layerCushion || windowResized) {
     let overlapValue = overlapSlider.value() / 100;
     layerCushion = (halfCanvasSize / numLayers) * (0.8 + (overlapValue * 0.3));
   }
@@ -1222,7 +1299,8 @@ function toggleAnimation() {
     }
     
     // Show animation controls
-    document.getElementById('animation-controls').classList.add('visible');
+    let animControls = select('#animation-controls');
+    animControls.addClass('visible');
     loop();
   } else {
     animateButton.removeClass('active');
@@ -1230,7 +1308,8 @@ function toggleAnimation() {
     lastAnimationState = false;
     
     // Hide animation controls
-    document.getElementById('animation-controls').classList.remove('visible');
+    let animControls = select('#animation-controls');
+    animControls.removeClass('visible');
     noLoop();
   }
 }
