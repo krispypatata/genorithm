@@ -1,3 +1,50 @@
+// Calculate appropriate canvas size based on window dimensions
+function calculateCanvasSize() {
+  let controlPanelWidth = 220; // Width of each control panel
+  let padding = 40; // Additional padding
+  
+  // For wider screens - horizontal layout
+  if (windowWidth > 900) {
+    // Leave space for the control panels and padding
+    let availableWidth = windowWidth - (controlPanelWidth * 2) - padding;
+    let availableHeight = windowHeight - padding;
+    
+    // Use the smaller dimension to make sure everything fits
+    let size = min(availableWidth, availableHeight);
+    
+    // Set minimum and maximum sizes
+    size = constrain(size, 300, 800);
+    
+    return size;
+  } 
+  // For narrower screens - vertical layout
+  else {
+    // In vertical layout, we're constrained by width
+    let availableWidth = windowWidth - padding;
+    // Leave some space for controls above and below
+    let availableHeight = windowHeight - 400; 
+    
+    // Use the smaller dimension to make sure everything fits
+    let size = min(availableWidth, availableHeight);
+    
+    // Set minimum size
+    size = constrain(size, 250, 500);
+    
+    return size;
+  }
+}
+
+// Handle window resize events
+function windowResized() {
+  let newSize = calculateCanvasSize();
+  resizeCanvas(newSize, newSize);
+  
+  // Reset and translate to center of canvas
+  resetMatrix();
+  translate(width / 2, height / 2);
+}
+
+// ═════════════════════════════════════════════════════════════════════════════════════════════════
 let params = {
   angle1: 90,        // Angle between branches
   angle2: 0,         // Angular rotation for new branches
@@ -25,9 +72,13 @@ let checkboxes = {};
 let controlsContainer;
 
 function setup() {
-  let size = 500;
+  // let size = 500;
+  let size = calculateCanvasSize();
   let canvas = createCanvas(size, size);
   
+  // Place canvas in the canvas container
+  canvas.parent('canvas-container');
+
   colorMode(HSB, 360, 100, 100);
   noLoop();
   
@@ -37,7 +88,8 @@ function setup() {
   
   // ===== CORE PARAMETERS =====
   let coreSection = createDiv('');
-  coreSection.parent(controlsContainer);
+  // coreSection.parent(controlsContainer);
+  coreSection.parent('left-panel');
   
   labels.heading1 = createElement('h3', 'Core Parameters');
   labels.heading1.parent(coreSection);
@@ -83,7 +135,8 @@ function setup() {
   
   // ===== SIZE CONTROLS =====
   let sizeSection = createDiv('');
-  sizeSection.parent(controlsContainer);
+  // sizeSection.parent(controlsContainer);
+  sizeSection.parent('left-panel');
   
   labels.heading2 = createElement('h3', 'Size Controls');
   labels.heading2.parent(sizeSection);
@@ -138,7 +191,8 @@ function setup() {
   
   // ===== ENHANCEMENTS =====
   let enhancementsSection = createDiv('');
-  enhancementsSection.parent(controlsContainer);
+  // enhancementsSection.parent(controlsContainer);
+  enhancementsSection.parent('right-panel');
   
   labels.heading3 = createElement('h3', 'Enhancements');
   labels.heading3.parent(enhancementsSection);
@@ -338,7 +392,8 @@ function setup() {
   
   // Randomize button
   let randomizeBtn = createButton('Randomize All');
-  randomizeBtn.parent(controlsButtonSection);
+  // randomizeBtn.parent(controlsButtonSection);
+  randomizeBtn.parent('right-panel');
   randomizeBtn.mousePressed(randomizeParams);
   
   // Initial UI setup

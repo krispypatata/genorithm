@@ -1,14 +1,42 @@
 html, body {
   margin: 0;
   padding: 0;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  /* overflow: hidden; */
+
+  font-family: Arial, sans-serif;
+  background-color: #f0f0f0;
+  color: #333;
 }
 
 canvas {
   display: block;
-  position: absolute;
-  left: 10px;
-  top: 10px;
+  position: relative;
+  top: 0;
+  left: 0;
+  max-width: 100%;
+  height: auto;
+  margin: 20px auto;
+  border: 2px solid #000;
+  border-radius: 10px; /* Rounded corners for the canvas */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
+
+.control-panel-left {
+  order: 1;
+}
+
+.canvas-container {
+  order: 2;
+}
+
+.control-panel-right{
+  order: 3;
+}
+
 
 /* Controls container */
 .controls-container {
