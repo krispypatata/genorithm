@@ -1,31 +1,31 @@
+// Class for a single block in the grid
 class Block {
   constructor(x, y) {
     this.x = x;
     this.y = y;
     this.angle = 0;
-    this.c = 70;
-    this.activated = false;
-    this.animationProgress = 0;
-    this.opacity = 40; // Lower default opacity for background grid
+    this.c = 70;  
+    this.activated = false;  
+    this.animationProgress = 0; 
+    this.opacity = 40;
     this.size = 1.0;
-    this.lastUpdate = 0;
-    this.animationDuration = 800; // Animation duration in milliseconds
-    this.shapeType = floor(random(4)); // Random shape type (0-3)
-    this.nextShapeType = this.shapeType; // Next shape to transition to
-    this.morphProgress = 0; // Progress of morphing between shapes
-    this.isTextBlock = false; // Whether this block is part of the text
+    this.lastUpdate = 0; 
+    this.animationDuration = 800;
+    this.shapeType = floor(random(4));
+    this.nextShapeType = this.shapeType;
+    this.morphProgress = 0;
+    this.isTextBlock = false;
   }
 
+  // Draws the block on the canvas with current properties
   display() {
     push();
     
-    // Always draw a shape regardless of animation state
+    // Apply different styling based on block state (activated or not)
     if (this.activated) {
-      // For activated blocks, use the animation opacity with minimum value
       const validOpacity = constrain(this.opacity, 60, 180);
       
       if (this.isTextBlock) {
-        // Much brighter appearance for activated text blocks
         stroke(230, 230, 230, validOpacity);
         strokeWeight(1.5);
         fill(230, 230, 230, validOpacity * 0.25);
@@ -35,12 +35,10 @@ class Block {
         fill(this.c, this.c, this.c, validOpacity * 0.15);
       }
     } else if (this.isTextBlock) {
-      // Brighter styling for text blocks at rest
       stroke(220, 220, 220, 180);
       strokeWeight(1.2);
       fill(220, 220, 220, 50);
     } else {
-      // For background grid, use a fixed low opacity
       stroke(80, 80, 80, 70);
       strokeWeight(0.8);
       noFill();
@@ -50,80 +48,65 @@ class Block {
     rotate(this.angle);
     scale(this.size);
     
-    // Draw the appropriate shape based on current state
     this.drawShape();
     
     pop();
   }
 
+  // Updates the block's animation state
   move() {
-    // Animation logic - separate from mouse detection
+    // Only update animation if the block is activated
     if (this.activated) {
-      // Calculate delta time for frame-rate independent animation
       const currentTime = millis();
       const deltaTime = currentTime - this.lastUpdate;
       this.lastUpdate = currentTime;
       
-      // Progress based on actual time passed
       const progressIncrement = deltaTime / this.animationDuration;
       this.animationProgress += progressIncrement;
       
-      // Multiple easing functions for more organic motion
       const easedProgress = this.customEasing(min(this.animationProgress, 1));
       
-      // Map progress to angle with easing
       this.angle = 90 * this.easeOutBack(min(easedProgress * 1.2, 1));
       
-      // Opacity control - quick fade in, longer fade out with bounce
-      // Ensure higher minimum opacity to prevent black spaces
+      // Adjust opacity based on animation phase
       if (this.animationProgress <= 0.2) {
         this.opacity = map(this.easeInOutCubic(this.animationProgress / 0.2), 0, 1, 180, 255);
       } else {
         this.opacity = map(this.easeOutCubic((this.animationProgress - 0.2) / 0.8), 0, 1, 255, 60);
       }
       
-      // Scale effect with elastic bounce
       const scaleCurve = this.easeOutElastic(min(this.animationProgress * 1.5, 1));
       this.size = 1 + 0.15 * scaleCurve;
       
-      // Color control - smoother transition
-      this.c = map(this.easeInOutCubic(this.animationProgress), 0, 1, 200, 70); // Reduced max color from 255 to 200
+      this.c = map(this.easeInOutCubic(this.animationProgress), 0, 1, 200, 70);
       
-      // Shape morphing control
-      // Change shape at certain points in the animation
+      // Handle shape morphing at different stages of animation
       if (this.animationProgress > 0.1 && this.animationProgress < 0.15) {
-        // First shape change
         this.nextShapeType = (this.shapeType + 1) % 4;
         this.morphProgress = map(this.animationProgress, 0.1, 0.15, 0, 1);
       } else if (this.animationProgress > 0.4 && this.animationProgress < 0.5) {
-        // Second shape change
         this.nextShapeType = (this.shapeType + 2) % 4;
         this.morphProgress = map(this.animationProgress, 0.4, 0.5, 0, 1);
       } else if (this.animationProgress > 0.7 && this.animationProgress < 0.8) {
-        // Return to original shape
         this.nextShapeType = this.shapeType;
         this.morphProgress = map(this.animationProgress, 0.7, 0.8, 0, 1);
       } else if (this.animationProgress <= 0.1 || this.animationProgress >= 0.8) {
-        // Before first change or after last change
         this.morphProgress = 0;
       } else if (this.animationProgress >= 0.15 && this.animationProgress <= 0.4) {
-        // Between first and second change
         this.morphProgress = 1;
       } else if (this.animationProgress >= 0.5 && this.animationProgress <= 0.7) {
-        // Between second and third change
         this.morphProgress = 1;
       }
       
-      // Reset when animation completes
+      // Reset block properties when animation completes
       if (this.animationProgress >= 1) {
         this.angle = 0;
         this.animationProgress = 0;
         this.activated = false;
         this.c = 70;
-        this.opacity = 70; // Reset to higher default opacity for background grid (was 40)
+        this.opacity = 70;
         this.size = 1.0;
         this.morphProgress = 0;
-        // Occasionally change the base shape type
         if (random() < 0.3) {
           this.shapeType = floor(random(4));
         }
@@ -132,14 +115,14 @@ class Block {
     }
   }
   
-  // Draw appropriate shape based on current state and morphing progress
+  // Draws the current shape based on shape type and morphing state
   drawShape() {
     const margin = -size / 2;
     const inset = offset / 2;
     const sizeWithOffset = size - offset;
     
+    // Draw the current shape when not morphing
     if (this.morphProgress === 0) {
-      // Draw single shape with no morphing
       switch(this.shapeType) {
         case 0: // X shape
           this.drawX(margin, inset, sizeWithOffset);
@@ -154,8 +137,9 @@ class Block {
           this.drawDiamond(margin, inset, sizeWithOffset);
           break;
       }
-    } else if (this.morphProgress === 1) {
-      // Draw next shape fully
+    } 
+    // Draw the target shape when morphing is complete
+    else if (this.morphProgress === 1) {
       switch(this.nextShapeType) {
         case 0: // X shape
           this.drawX(margin, inset, sizeWithOffset);
@@ -170,9 +154,9 @@ class Block {
           this.drawDiamond(margin, inset, sizeWithOffset);
           break;
       }
-    } else {
-      // Draw both shapes during morphing, ensuring no black spaces
-      // First draw the shape that's fading out
+    } 
+    // Draw both shapes during morphing transition
+    else {
       switch(this.shapeType) {
         case 0: this.drawX(margin, inset, sizeWithOffset); break;
         case 1: this.drawRect(margin, inset, sizeWithOffset); break;
@@ -180,7 +164,6 @@ class Block {
         case 3: this.drawDiamond(margin, inset, sizeWithOffset); break;
       }
       
-      // Then overlay the shape that's fading in
       switch(this.nextShapeType) {
         case 0: this.drawX(margin, inset, sizeWithOffset); break;
         case 1: this.drawRect(margin, inset, sizeWithOffset); break;
@@ -190,20 +173,23 @@ class Block {
     }
   }
   
-  // Shape drawing methods
+  // Draws an X shape
   drawX(margin, inset, sizeWithOffset) {
     line(margin + inset, margin + inset, margin + sizeWithOffset + inset, margin + sizeWithOffset + inset);
     line(margin + sizeWithOffset + inset, margin + inset, margin + inset, margin + sizeWithOffset + inset);
   }
   
+  // Draws a square
   drawRect(margin, inset, sizeWithOffset) {
     rect(0, 0, sizeWithOffset, sizeWithOffset);
   }
   
+  // Draws a circle
   drawCircle(margin, inset, sizeWithOffset) {
     ellipse(0, 0, sizeWithOffset, sizeWithOffset);
   }
   
+  // Draws a diamond
   drawDiamond(margin, inset, sizeWithOffset) {
     const halfSize = sizeWithOffset / 2;
     beginShape();
@@ -214,37 +200,42 @@ class Block {
     endShape(CLOSE);
   }
   
-  // Smooth easing function for more natural animation
+  // Provides a smooth transition between values
   easeInOutQuad(t) {
     return t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
   }
   
-  // Additional easing functions for more organic motion
+  // Creates a smooth cubic easing for transitions
   easeInOutCubic(t) {
     return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2;
   }
   
+  // Creates a smooth exit curve
   easeOutCubic(t) {
     return 1 - Math.pow(1 - t, 3);
   }
   
+  // Creates a bouncy elastic effect at the end of animation
   easeOutElastic(t) {
     const c4 = (2 * Math.PI) / 3;
     return t === 0 ? 0 : t === 1 ? 1 : Math.pow(2, -10 * t) * Math.sin((t * 10 - 0.75) * c4) + 1;
   }
   
+  // Creates a slight overshoot at the end of animation
   easeOutBack(t) {
     const c1 = 1.70158;
     const c3 = c1 + 1;
     return 1 + c3 * Math.pow(t - 1, 3) + c1 * Math.pow(t - 1, 2);
   }
   
-  // Combined custom easing for main animation
+  // Combines multiple easing functions for a more natural animation
   customEasing(t) {
-    // Blend different easing functions for more organic feel
+    // Use cubic easing for first half of animation
     if (t < 0.5) {
       return this.easeInOutCubic(t * 2) / 2;
-    } else {
+    } 
+    // Use different easing for second half
+    else {
       return 0.5 + this.easeOutCubic((t - 0.5) * 2) / 2;
     }
   }
@@ -262,27 +253,25 @@ let mousePath = [];
 let maxPathLength = 10;
 let textGraphic; // Buffer for text detection
 
+// Initialize the canvas and create the grid of blocks
 function setup() {
   createCanvas(windowWidth, windowHeight/2);
   rectMode(CENTER);
   angleMode(DEGREES);
-  frameRate(60); // Ensure smooth frame rate
+  frameRate(60);
 
   cols = floor(width/size);
   rows = floor(height/size);
 
-  // Create text graphic first to ensure it's available for block initialization
   createTextGraphic();
   createBlocks();
 }
 
-// Create a graphics buffer with the text to detect which blocks should be highlighted
+// Creates a graphic buffer with the text "GENORITHM" for highlighting blocks
 function createTextGraphic() {
   textGraphic = createGraphics(width, height);
   textGraphic.background(0);
   
-  // Define a bitmap-style representation for each letter with consistent thickness
-  // 1 = pixel on, 0 = pixel off
   const letterPatterns = {
     'G': [
       [1,1,1,1,1],
@@ -349,24 +338,23 @@ function createTextGraphic() {
     ]
   };
   
-  // Calculate the pixel size based on canvas width
   const word = "GENORITHM";
   const pixelSize = max(width / (word.length * 8), 4);
   
-  // Calculate the start position to center the text
-  const totalWidth = word.length * 6 * pixelSize; // 6 pixels wide per letter (5 + 1 space)
+  const totalWidth = word.length * 6 * pixelSize;
   const startX = (width - totalWidth) / 2;
   const startY = (height - 5 * pixelSize) / 2;
   
-  // Draw each letter
   textGraphic.fill(255);
   textGraphic.noStroke();
   
+  // Loop through each letter in the word
   for (let charIndex = 0; charIndex < word.length; charIndex++) {
     const letter = word[charIndex];
     const pattern = letterPatterns[letter];
     
     if (pattern) {
+      // Draw each pixel of the letter pattern
       for (let y = 0; y < pattern.length; y++) {
         for (let x = 0; x < pattern[y].length; x++) {
           if (pattern[y][x] === 1) {
@@ -380,67 +368,66 @@ function createTextGraphic() {
   }
 }
 
+// Creates the grid of blocks and marks blocks that are part of the text
 function createBlocks() {
   blocks = [];
+  // Create a 2D array of blocks based on grid dimensions
   for (let i = 0; i < cols; i++) {
     blocks[i] = [];
     for (let j = 0; j < rows; j++) {
       blocks[i][j] = new Block(size / 2 + i * size, size / 2 + j * size);
       
-      // Check if this block position falls within text area
       const blockX = size / 2 + i * size;
       const blockY = size / 2 + j * size;
       
-      // Check if this block is part of the text
       blocks[i][j].isTextBlock = isPositionInText(blockX, blockY);
     }
   }
 }
 
-// Check if a position is within the text area by sampling the text buffer
+// Checks if a position is part of the text by sampling the text graphic
 function isPositionInText(x, y) {
   if (!textGraphic) return false;
   
-  // Simple sampling directly at the point
-  // This works better with the much larger text
   const pixel = textGraphic.get(x, y);
   
-  // Any non-black pixel is considered part of the text
   return pixel[0] > 0;
 }
 
+// Resizes the canvas and rebuilds the grid when the window is resized
 function windowResized() {
   resizeCanvas(windowWidth, windowHeight/2);
   cols = floor(width/size);
   rows = floor(height/size);
-  createTextGraphic(); // Recreate text buffer at new size
+  createTextGraphic();
   createBlocks();
 }
 
+// Updates and displays all blocks on each frame
 function draw() {
-  // Clear the background to black
   background(0);
   
-  // Check if mouse is moving
+  // Check if mouse position changed since last frame
   mouseIsMoving = (pmouseX !== mouseX || pmouseY !== mouseY);
   
-  // Update mouse path for smoother trails
+  // When mouse is moving, create and activate blocks along the path
   if (mouseIsMoving) {
+    // Store mouse positions to create a smooth trail effect
     mousePath.push({x: mouseX, y: mouseY, timestamp: millis()});
     
-    // Keep path at manageable length
+    // Keep only the most recent positions
     if (mousePath.length > maxPathLength) {
       mousePath.shift();
     }
     
-    // Get mouse velocity for dynamic activation radius
+    // Calculate how fast the mouse is moving
     const mouseVelocity = dist(mouseX, mouseY, pmouseX, pmouseY);
     
-    // Calculate points along the mouse path with Catmull-Rom spline for smooth curves
+    // If enough points collected, create a smooth curve between them
     if (mousePath.length >= 4) {
-      // More points for smoother trail with no gaps
       const steps = constrain(ceil(mouseVelocity * 2), 8, 20);
       
+      // Create points along the curve between recorded mouse positions
       for (let i = 0; i < mousePath.length - 3; i++) {
         const p0 = mousePath[i];
         const p1 = mousePath[i+1];
@@ -451,24 +438,21 @@ function draw() {
           const progress = t / steps;
           const splinePoint = getCatmullRomPoint(p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y, progress);
           
-          // Dynamic activation radius based on mouse speed
           const activationRadius = distMouse + min(mouseVelocity/1.5, 12);
           
-          // Activate blocks with falloff based on distance
           activateNearbyBlocksWithFalloff(splinePoint.x, splinePoint.y, activationRadius);
         }
       }
     } else {
-      // Fallback for when we don't have enough points for spline
       activateNearbyBlocksWithFalloff(mouseX, mouseY, distMouse + min(mouseVelocity/1.5, 12));
     }
     
-    // Clean up old path points
     const currentTime = millis();
+    // Remove old mouse positions from the path
     mousePath = mousePath.filter(point => currentTime - point.timestamp < 200);
   }
   
-  // Update and display all blocks
+  // Update and display all blocks in the grid
   for (let i = 0; i < cols; i++) {
     for (let j = 0; j < rows; j++) {
       blocks[i][j].move();
@@ -477,50 +461,54 @@ function draw() {
   }
 }
 
-// Catmull-Rom spline interpolation for smooth curves
+// Calculates a point along a smooth curve using Catmull-Rom spline interpolation
 function getCatmullRomPoint(x0, y0, x1, y1, x2, y2, x3, y3, t) {
+  // This creates a smooth curve through the 4 mouse points
+  // t is a value between 0 and 1 that determines position along the curve
   const t2 = t * t;
   const t3 = t2 * t;
   
-  // Catmull-Rom matrix
+  // Calculate blending factors for the smooth curve
   const b0 = 0.5 * (-t3 + 2*t2 - t);
   const b1 = 0.5 * (3*t3 - 5*t2 + 2);
   const b2 = 0.5 * (-3*t3 + 4*t2 + t);
   const b3 = 0.5 * (t3 - t2);
   
-  // Calculate interpolated point
+  // Blend the four input points to get the final curve point
   const x = b0*x0 + b1*x1 + b2*x2 + b3*x3;
   const y = b0*y0 + b1*y1 + b2*y2 + b3*y3;
   
   return {x, y};
 }
 
-// Function to activate blocks with falloff based on distance
+// Activates blocks near the given position with intensity based on distance
 function activateNearbyBlocksWithFalloff(x, y, radius) {
-  // Calculate center block indices
+  // Convert mouse position to grid coordinates
   const centerI = floor(x / size);
   const centerJ = floor(y / size);
   
-  // Only check blocks within a certain range for efficiency
+  // Calculate how many grid cells we need to check in each direction
   const checkRadius = ceil(radius / size) + 1;
   
+  // Loop through all blocks within the activation area
   for (let i = max(0, centerI - checkRadius); i <= min(cols - 1, centerI + checkRadius); i++) {
     for (let j = max(0, centerJ - checkRadius); j <= min(rows - 1, centerJ + checkRadius); j++) {
       const block = blocks[i][j];
       const distance = dist(x, y, block.x, block.y);
       
+      // Activate blocks within the radius that aren't already activated
       if (distance < radius && !block.activated) {
-        // Add slight randomization to activation time for more organic feel
-        const activationDelay = random(0, 0.05); // Smaller delay to avoid gaps
+        // Add a small random delay to create more natural ripple effect
+        const activationDelay = random(0, 0.05);
         block.activated = true;
-        block.animationProgress = -activationDelay; // Negative progress creates delay
+        block.animationProgress = -activationDelay;
         block.lastUpdate = millis();
         
-        // Intensity based on distance from cursor
-        const intensity = map(distance, 0, radius, 0.9, 0.6); // Reduced intensity range from (1, 0.7) to (0.9, 0.6)
-        block.c = 200 * intensity; // Reduced from 255 to 200
+        // Blocks closer to the mouse position appear brighter
+        const intensity = map(distance, 0, radius, 0.9, 0.6);
+        block.c = 200 * intensity;
         
-        // Randomize animation duration slightly for more organic feel
+        // Add slight variation to animation speed
         block.animationDuration = random(700, 900);
       }
     }
