@@ -31,7 +31,7 @@ canvas {
 .content-container {
   max-width: 900px;
   margin: 0 auto;
-  padding: 3rem 2rem;
+  padding: 1rem 2rem;
   position: relative;
   line-height: normal;
   background-color: #ffffff;
@@ -39,17 +39,21 @@ canvas {
 
 p {
   line-height: 1.6;
-  margin-bottom: 1.5rem;
+  margin-bottom: 0.5rem;
   font-size: 1.1rem;
-  max-width: 800px;
   text-align: center;
   margin-left: auto;
   margin-right: auto;
 }
 
+.overview {
+  max-width: 2000px;
+  margin-bottom: 1rem;
+}
+
 .group-number {
   margin-bottom: 0.2rem;
-  margin-top: 4rem; /* Space between the overview and the group number */
+  margin-top: 1.5rem;
   font-weight: bold;
   text-align: center;
   max-width: 800px;
