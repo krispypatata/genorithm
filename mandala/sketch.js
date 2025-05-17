@@ -672,7 +672,7 @@ function setup() {
     }
   });
 
-  let opacityControl = createAnimationControl(animationControlsContainer, 'Opac. Pulse', true, 0.5);
+  let opacityControl = createAnimationControl(animationControlsContainer, 'Opacity Pulse', true, 0.5);
   opacityCheckbox = opacityControl.checkbox;
   opacitySpeedSlider = opacityControl.slider;
   opacitySpeedSlider.input(() => {

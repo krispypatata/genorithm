@@ -241,10 +241,17 @@ button.animate.active {
   display: flex;
   flex-direction: column;
   align-items: flex-start;
+  /* padding: 10px; */
 }
 
 .animation-control input[type="checkbox"] {
   margin-bottom: 8px;
+  margin-right: 10px; /* Add spacing between the checkbox and its label */
+}
+
+.animation-control label {
+  /* Add padding to the label */
+  /* padding-left: 35px;  */
 }
 
 .slider-wrapper {
