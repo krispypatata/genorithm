@@ -47,8 +47,53 @@ p {
   margin-right: auto;
 }
 
+.group-number {
+  margin-bottom: 0.2rem;
+  margin-top: 4rem; /* Space between the overview and the group number */
+  font-weight: bold;
+  text-align: center;
+  max-width: 800px;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.content-container::after {
+  content: "";
+  display: table;
+  clear: both;
+}
+
+.group-member-container {
+  max-width: 800px;
+  margin: 0 auto;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.group-member {
+  display: inline-block;
+  width: 33.33%;
+  padding: 0.2rem;
+  box-sizing: border-box;
+  text-align: center;
+  margin: 0;
+  line-height: 1.2;
+  float: none;
+}
+
 @media (max-width: 768px) {
   .content-container {
     padding: 1rem;
+  }
+  
+  .group-member {
+    width: 50%;
+  }
+}
+
+@media (max-width: 480px) {
+  .group-member {
+    width: 100%;
   }
 }
