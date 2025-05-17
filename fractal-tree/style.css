@@ -70,6 +70,14 @@ canvas {
 
 .control-panel-right{
   order: 3;
+
+  display: flex;
+  flex-direction: column;
+}
+
+/* Place the randomize button at the very bottom of the right panel */
+.control-panel-right > *:last-child {
+  margin-top: auto;
 }
 
 /* Left Panel */
@@ -128,7 +136,19 @@ canvas {
   display: none;
 }
 
+.enhancements-section {
+  margin-bottom: 15px;
+  padding: 10px;
+  border: 1px solid #ddd;
+  border-radius: 8px;
+  /* background-color: #f9f9f9; */
+  border: 1px solid #000000;
+  border-radius: 8px;
+}
 
+.enhancements-section h3 {
+  display: none; /* Hide headings in the new sections */
+}
 
 /* Controls container */
 .controls-container {
@@ -166,16 +186,22 @@ input[type="range"] {
   position: relative;
   display: inline-block;
   vertical-align: middle;
-  width: 150px;
+  /* width: 150px; */
   /* background-color: red; */
+}
+
+.checkbox-container label {
+  width: auto;
+  /* padding-left: 10px; */
 }
 
 .checkbox-container input[type="checkbox"] {
   vertical-align: middle;
+  margin-right: 10px; /* Add spacing between the checkbox and its label */
+  margin-bottom: 5px;
 }
 
 .checkbox-container.active {
-  background-color: rgba(0, 0, 0, 0.1);
   border-radius: 3px;
 }
 
@@ -190,11 +216,11 @@ input[type="range"] {
 }
 
 /* When colorVariation is active */
-.color-variation-active .color-variation-controls {
+#right-panel.color-variation-active .color-variation-controls {
   display: block;
 }
 
-.color-variation-active .solid-color-controls {
+#right-panel.color-variation-active .solid-color-controls {
   display: none;
 }
 
@@ -209,3 +235,49 @@ button.active {
   border-color: #999;
 }
 
+/* Main buttons container styling */
+.main-buttons-container {
+  margin-top: 10px;
+  padding-top: 15px;
+  /* border-top: 1px solid #eee; */
+  display: flex;
+  justify-content: center;
+  gap: 10px;
+  position: relative;
+  z-index: 1;
+}
+
+.main-buttons-container button {
+  padding: 8px 15px;
+  /* font-weight: bold; */
+  min-width: 80px;
+}
+
+.main-buttons-container button {
+  background-color: yellow;
+  color: #000000;
+  border: 1px solid #000000;
+  border-radius: 8px; /* Rounded edges */
+  padding: 8px 16px;
+  margin: 4px;
+  font-size: 14px;
+  cursor: pointer;
+  transition: background-color 0.2s, transform 0.2s;
+
+  width: calc(95%);
+}
+
+.main-buttons-container button:hover {
+  background-color: yellow;
+  transform: scale(1.02);
+}
+
+/* Sliders */
+input[type="range"] {
+  width: calc(95%);
+}
+
+.checkbox-branch-gradient {
+  margin-top: 10px;
+  /* margin-bottom: 5px; */
+}

@@ -192,18 +192,18 @@ function setup() {
   sliders.widthMult.input(updateAndRedraw);
   
   // ===== ENHANCEMENTS =====
-  let enhancementsSection = createDiv('');
-  enhancementsSection.class('enhancements-controls');
-  // enhancementsSection.parent(controlsContainer);
-  enhancementsSection.parent('right-panel');
+  // Create top enhancements section (Depth and Randomness)
+  let enhancementsTopSection = createDiv('');
+  enhancementsTopSection.class('enhancements-section enhancements-top'); // Add class for styling
+  enhancementsTopSection.parent('right-panel');
   
   labels.heading3 = createElement('h3', 'Enhancements');
-  labels.heading3.parent(enhancementsSection);
+  labels.heading3.parent(enhancementsTopSection); // Parent heading to top section
   
   // Recursion Depth
   let depthGroup = createDiv('');
   depthGroup.class('control-group');
-  depthGroup.parent(enhancementsSection);
+  depthGroup.parent(enhancementsTopSection); // Parent depth group to top section
   
   labels.depth = createElement('label', 'Depth:');
   labels.depth.parent(depthGroup);
@@ -215,7 +215,7 @@ function setup() {
   // Randomness
   let randomnessGroup = createDiv('');
   randomnessGroup.class('control-group');
-  randomnessGroup.parent(enhancementsSection);
+  randomnessGroup.parent(enhancementsTopSection);
   
   labels.randomness = createElement('label', 'Randomness:');
   labels.randomness.parent(randomnessGroup);
@@ -224,10 +224,15 @@ function setup() {
   sliders.randomness.parent(randomnessGroup);
   sliders.randomness.input(updateAndRedraw);
   
+  // Create bottom enhancements section (Color Controls)
+  let enhancementsBottomSection = createDiv('');
+  enhancementsBottomSection.class('enhancements-section enhancements-bottom'); // Add class for styling
+  enhancementsBottomSection.parent('right-panel');
+  
   // Color Variation Mode
   let colorVarGroup = createDiv('');
-  // colorVarGroup.class('control-group');
-  colorVarGroup.parent(enhancementsSection);
+  // colorVarGroup.class('control-group'); // Keep this commented or remove if not needed
+  colorVarGroup.parent(enhancementsBottomSection); // Parent color variation group to bottom section
   
   // labels.colorVariation = createElement('label', 'Color Variation:');
   // labels.colorVariation.parent(colorVarGroup);
@@ -254,7 +259,7 @@ function setup() {
   
   // Color controls container
   let colorControlsSection = createDiv('');
-  colorControlsSection.parent(enhancementsSection);
+  colorControlsSection.parent(enhancementsBottomSection); // Parent color controls container to bottom section
   
   // Solid Color Controls
   let solidColorControls = createDiv('');
@@ -349,6 +354,7 @@ function setup() {
   
   checkboxes.branchGradient = createCheckbox('Branch Gradient', params.branchGradient);
   checkboxes.branchGradient.parent(branchGradientCheckboxContainer);
+  checkboxes.branchGradient.class('checkbox-branch-gradient');
   if (params.branchGradient) {
     branchGradientCheckboxContainer.addClass('active');
   }
@@ -389,15 +395,23 @@ function setup() {
     redraw();
   });
   
-  // ===== CONTROLS =====
-  let controlsButtonSection = createDiv('');
-  controlsButtonSection.parent(controlsContainer);
+  // ===== MAIN BUTTONS CONTROLS =====
+  // let controlsButtonSection = createDiv('');
+  let mainButtonsContainer = createDiv('');
+  mainButtonsContainer.class('main-buttons-container');
+  mainButtonsContainer.parent('right-panel');
   
-  // Randomize button
-  let randomizeBtn = createButton('Randomize All');
-  // randomizeBtn.parent(controlsButtonSection);
-  randomizeBtn.parent('right-panel');
+  // controlsButtonSection.parent(controlsContainer);
+  // Add randomize button directly to right-panel
+  let randomizeBtn = createButton('randomize');
+  randomizeBtn.parent(mainButtonsContainer); 
+  randomizeBtn.class('randomize-all');
   randomizeBtn.mousePressed(randomizeParams);
+
+  let printBtn = createButton('save jpg');
+  printBtn.parent(mainButtonsContainer);
+  printBtn.class('save-jpg');
+  printBtn.mousePressed(saveJpg);
   
   // Initial UI setup
   updateUI();
@@ -424,10 +438,11 @@ function updateParams() {
 
 function updateUI() {
   // Toggle color-variation-active class on controlsContainer based on colorVariation mode
+  const rightPanel = document.getElementById('right-panel');
   if (params.colorVariation) {
-    controlsContainer.addClass('color-variation-active');
+    rightPanel.classList.add('color-variation-active');
   } else {
-    controlsContainer.removeClass('color-variation-active');
+    rightPanel.classList.remove('color-variation-active');
   }
   
   // Update active state for colorVariation checkbox container
@@ -524,6 +539,10 @@ function drawBranch(len, angle, depth, width) {
     }
   }
   pop();
+}
+
+function saveJpg() {
+  save("fractal-art.jpg");
 }
 
 function randomizeParams() {

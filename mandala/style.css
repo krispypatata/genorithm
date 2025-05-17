@@ -245,7 +245,8 @@ button.animate.active {
 }
 
 .animation-control input[type="checkbox"] {
-  margin-bottom: 8px;
+  vertical-align: middle;
+  margin-bottom: 5px;
   margin-right: 10px; /* Add spacing between the checkbox and its label */
 }
 
