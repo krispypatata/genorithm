@@ -544,17 +544,25 @@ function setup() {
   // Petals
   let petalControl = createSliderContainer(leftPanel, "No. of petals", minPetalsValue, maxPetalsValue, defaultPetalsValue, 2);
   petalSlider = petalControl.slider;
-  
+    // Update the label to use descriptive text
+    petalSlider.input(() => {
+      petalControl.label.html(`No. of petals: ${petalSlider.value()}`);
+    });
+    
   randomPetalButton = createToggleButton(petalControl.container, "random", 'random', petalsRandom);
   // If the initial randomPetalsMode is 1, set the button to active and disable slider
   if (randomPetalsMode == 1) {
     randomPetalButton.addClass('active');
     petalSlider.attribute('disabled', '');
   }
-  
+
   // Layers
   let layersControl = createSliderContainer(leftPanel, "No. of layers", minLayersValue, maxLayersValue, defaultLayersValue);
   layersSlider = layersControl.slider;
+  // Update the label to use descriptive text
+  layersSlider.input(() => {
+    layersControl.label.html(`No. of layers: ${layersSlider.value()}`);
+  });
   
   randomLayersButton = createToggleButton(layersControl.container, "random", 'random', layersRandom);
   // If the initial randomLayersMode is 1, set the button to active and disable slider
@@ -566,7 +574,11 @@ function setup() {
   // Alpha (opacity)
   let alphaControl = createSliderContainer(leftPanel, "Opacity", minOpacityValue, maxOpacityValue, defaultOpacityValue);
   alphaSlider = alphaControl.slider;
-  
+  // Update the label to use descriptive text
+  alphaSlider.input(() => {
+    alphaControl.label.html(`Opacity: ${alphaSlider.value()}`);
+  });
+
   randomAlphaButton = createToggleButton(alphaControl.container, "random", 'random', alphaRandom);
   // If the initial randomAlphaMode is 1, set the button to active and disable slider
   if (randomAlphaMode == 1) {
