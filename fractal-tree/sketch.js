@@ -105,7 +105,12 @@ function setup() {
   
   sliders.angle1 = createSlider(0, 360, params.angle1);
   sliders.angle1.parent(angle1Group);
-  sliders.angle1.input(updateAndRedraw);
+  labels.angle1.html(`Branch Angle: ${sliders.angle1.value()}°`);
+  sliders.angle1.input(() => {
+    // Update the label to use descriptive text
+    labels.angle1.html(`Branch Angle: ${sliders.angle1.value()}°`);
+    updateAndRedraw();}
+  );
   
   // Angle 2
   let angle2Group = createDiv('');
@@ -117,7 +122,12 @@ function setup() {
   
   sliders.angle2 = createSlider(0, 360, params.angle2);
   sliders.angle2.parent(angle2Group);
-  sliders.angle2.input(updateAndRedraw);
+  labels.angle2.html(`Branch Rotation: ${sliders.angle2.value()}°`);
+  sliders.angle2.input(() => {
+    // Update the label to use descriptive text
+    labels.angle2.html(`Branch Rotation: ${sliders.angle2.value()}°`);
+    updateAndRedraw();}
+  );
   
   // Branches
   let branchesGroup = createDiv('');
@@ -129,8 +139,11 @@ function setup() {
   
   sliders.branches = createSlider(2, 5, params.branches, 1);
   sliders.branches.parent(branchesGroup);
+  labels.branches.html(`No. of Branches: ${sliders.branches.value()}`);
   sliders.branches.input(() => {
     params.branches = sliders.branches.value();
+    // Update the label to use descriptive text
+    labels.branches.html(`No. of Branches: ${sliders.branches.value()}`);
     updateAndRedraw();
   });
   
@@ -153,7 +166,12 @@ function setup() {
   
   sliders.startLength = createSlider(10, 200, params.startLength);
   sliders.startLength.parent(startLengthGroup);
-  sliders.startLength.input(updateAndRedraw);
+  labels.startLength.html(`Start Length: ${sliders.startLength.value()}`);
+  sliders.startLength.input(() => {
+    // Update the label to use descriptive text
+    labels.startLength.html(`Start Length: ${sliders.startLength.value()}`);
+    updateAndRedraw();
+  });
   
   // Length Multiplier
   let lengthMultGroup = createDiv('');
@@ -165,7 +183,12 @@ function setup() {
   
   sliders.lengthMult = createSlider(0.1, 0.9, params.lengthMult, 0.01);
   sliders.lengthMult.parent(lengthMultGroup);
-  sliders.lengthMult.input(updateAndRedraw);
+  labels.lengthMult.html(`Length Mult: ${sliders.lengthMult.value()}x`);
+  sliders.lengthMult.input(() => {
+    // Update the label to use descriptive text
+    labels.lengthMult.html(`Length Mult: ${sliders.lengthMult.value()}x`);
+    updateAndRedraw();
+  });
   
   // Start Width
   let startWidthGroup = createDiv('');
@@ -177,7 +200,12 @@ function setup() {
   
   sliders.startWidth = createSlider(1, 20, params.startWidth);
   sliders.startWidth.parent(startWidthGroup);
-  sliders.startWidth.input(updateAndRedraw);
+  labels.startWidth.html(`Start Width: ${sliders.startWidth.value()}`);
+  sliders.startWidth.input(() => {
+    // Update the label to use descriptive text
+    labels.startWidth.html(`Start Width: ${sliders.startWidth.value()}`);
+    updateAndRedraw();
+  });
   
   // Width Multiplier
   let widthMultGroup = createDiv('');
@@ -189,7 +217,12 @@ function setup() {
   
   sliders.widthMult = createSlider(0.1, 0.9, params.widthMult, 0.01);
   sliders.widthMult.parent(widthMultGroup);
-  sliders.widthMult.input(updateAndRedraw);
+  labels.widthMult.html(`Width Mult: ${sliders.widthMult.value()}x`);
+  sliders.widthMult.input(() => {
+    // Update the label to use descriptive text
+    labels.widthMult.html(`Width Mult: ${sliders.widthMult.value()}x`);
+    updateAndRedraw();
+  });
   
   // ===== ENHANCEMENTS =====
   // Create top enhancements section (Depth and Randomness)
@@ -210,19 +243,29 @@ function setup() {
   
   sliders.depth = createSlider(1, 15, params.depth, 1);
   sliders.depth.parent(depthGroup);
-  sliders.depth.input(updateAndRedraw);
+  labels.depth.html(`Depth: ${sliders.depth.value()}`);
+  sliders.depth.input(() => {
+    // Update the label to use descriptive text
+    labels.depth.html(`Depth: ${sliders.depth.value()}`);
+    updateAndRedraw();
+  });
   
   // Randomness
   let randomnessGroup = createDiv('');
   randomnessGroup.class('control-group');
   randomnessGroup.parent(enhancementsTopSection);
   
-  labels.randomness = createElement('label', 'Randomness:');
+  labels.randomness = createElement('label', 'Randomness Mult:');
   labels.randomness.parent(randomnessGroup);
   
   sliders.randomness = createSlider(0, 1, params.randomness, 0.01);
   sliders.randomness.parent(randomnessGroup);
-  sliders.randomness.input(updateAndRedraw);
+  labels.randomness.html(`Randomness Mult: ${sliders.randomness.value()}x`);
+  sliders.randomness.input(() => {
+    // Update the label to use descriptive text
+    labels.randomness.html(`Randomness Mult: ${sliders.randomness.value()}x`);
+    updateAndRedraw();
+  });
   
   // Create bottom enhancements section (Color Controls)
   let enhancementsBottomSection = createDiv('');
@@ -276,8 +319,11 @@ function setup() {
   
   sliders.solidHue = createSlider(0, 360, params.solidHue);
   sliders.solidHue.parent(solidHueGroup);
+  labels.solidHue.html(`Hue: ${sliders.solidHue.value()}°`);
   sliders.solidHue.input(() => {
     params.solidHue = sliders.solidHue.value();
+    // Update the label to use descriptive text
+    labels.solidHue.html(`Hue: ${sliders.solidHue.value()}°`);
     redraw();
   });
 
@@ -291,8 +337,11 @@ function setup() {
   
   sliders.solidSat = createSlider(0, 100, params.solidSat);
   sliders.solidSat.parent(solidSatGroup);
+  labels.solidSat.html(`Saturation: ${sliders.solidSat.value()}%`);
   sliders.solidSat.input(() => {
     params.solidSat = sliders.solidSat.value();
+    // Update the label to use descriptive text
+    labels.solidSat.html(`Saturation: ${sliders.solidSat.value()}%`);
     redraw();
   });
 
@@ -306,8 +355,11 @@ function setup() {
   
   sliders.solidBright = createSlider(0, 100, params.solidBright);
   sliders.solidBright.parent(solidBrightGroup);
+  labels.solidBright.html(`Brightness: ${sliders.solidBright.value()}%`);
   sliders.solidBright.input(() => {
     params.solidBright = sliders.solidBright.value();
+    // Update the label to use descriptive text
+    labels.solidBright.html(`Brightness: ${sliders.solidBright.value()}%`);
     redraw();
   });
   
@@ -326,7 +378,12 @@ function setup() {
   
   sliders.hue = createSlider(0, 360, params.hue);
   sliders.hue.parent(hueGroup);
-  sliders.hue.input(updateAndRedraw);
+  labels.hue.html(`Base Hue: ${sliders.hue.value()}°`);
+  sliders.hue.input(() => {
+    // Update the label to use descriptive text
+    labels.hue.html(`Base Hue: ${sliders.hue.value()}°`);
+    updateAndRedraw();
+  });
   
   // Hue Variation
   let hueVarGroup = createDiv('');
@@ -338,7 +395,12 @@ function setup() {
   
   sliders.hueVariation = createSlider(0, 180, params.hueVariation);
   sliders.hueVariation.parent(hueVarGroup);
-  sliders.hueVariation.input(updateAndRedraw);
+  labels.hueVariation.html(`Hue Spread: ${sliders.hueVariation.value()}°`);
+  sliders.hueVariation.input(() => {
+    // Update the label to use descriptive text
+    labels.hueVariation.html(`Hue Spread: ${sliders.hueVariation.value()}°`);
+    updateAndRedraw();
+  });
   
   // Branch Gradient
   let branchGradientGroup = createDiv('');
