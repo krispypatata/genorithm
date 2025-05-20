@@ -166,10 +166,10 @@ function setup() {
   
   sliders.startLength = createSlider(10, 200, params.startLength);
   sliders.startLength.parent(startLengthGroup);
-  labels.startLength.html(`Start Length: ${sliders.startLength.value()}px`);
+  labels.startLength.html(`Start Length: ${sliders.startLength.value()}`);
   sliders.startLength.input(() => {
     // Update the label to use descriptive text
-    labels.startLength.html(`Start Length: ${sliders.startLength.value()}px`);
+    labels.startLength.html(`Start Length: ${sliders.startLength.value()}`);
     updateAndRedraw();
   });
   
@@ -200,10 +200,10 @@ function setup() {
   
   sliders.startWidth = createSlider(1, 20, params.startWidth);
   sliders.startWidth.parent(startWidthGroup);
-  labels.startWidth.html(`Start Width: ${sliders.startWidth.value()}px`);
+  labels.startWidth.html(`Start Width: ${sliders.startWidth.value()}`);
   sliders.startWidth.input(() => {
     // Update the label to use descriptive text
-    labels.startWidth.html(`Start Width: ${sliders.startWidth.value()}px`);
+    labels.startWidth.html(`Start Width: ${sliders.startWidth.value()}`);
     updateAndRedraw();
   });
   
