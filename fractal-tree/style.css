@@ -167,8 +167,10 @@ h3 {
 /* Form elements */
 label {
   display: inline-block;
-  width: 120px;
+  width: auto;
+  min-width: 120px;
   margin-bottom: 20px;
+  white-space: nowrap;
 }
 
 input[type="range"] {
