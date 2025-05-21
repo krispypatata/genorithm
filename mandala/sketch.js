@@ -497,6 +497,9 @@ let curveStyleValues = curveStyleList.reduce((acc, style) => {
   acc[style] = style;
   return acc;
 }, {});
+
+let isFirstTimeLoaded = true; // Check if the project is first time loaded
+
 // ═════════════════════════════════════════════════════════════════════════════════════════════════
 // P5.JS MAIN FUNCTIONS
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
@@ -794,10 +797,23 @@ function windowResized() {
   resetMatrix();
   translate(width / 2, height / 2);
   
+  // Initialize the mandala if the window is first time loaded
+  // Uncomment this when the redrawMandala function is implemented (also delete this comment)
+  // if (isFirstTimeLoaded) {
+  //   newArt();
+  //   isFirstTimeLoaded = false;
+  // }
+
   // Redraw the mandala with updated dimensions
   if (!isAnimating) {
-    newArt();
+    newArt(); // Remove when redrawCurrentMandalaWithUpdatedDimensions function is implemented
+    // redrawCurrentMandalaWithUpdatedDimensions(); // Uncomment this when the redrawCurrentMandalaWithUpdatedDimensions function is implemented
   }
+}
+
+// Redraw the mandala when the window is resized
+function redrawCurrentMandalaWithUpdatedDimensions() {
+  // TODO: Implement this function
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
