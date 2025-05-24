@@ -751,6 +751,7 @@ function setup() {
   newArt();
 }
 
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
 // Calculate appropriate canvas size based on window dimensions
 function calculateCanvasSize() {
   let controlPanelWidth = 220; // Width of each control panel
@@ -787,7 +788,8 @@ function calculateCanvasSize() {
   }
 }
 
-// Handle window resize events
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Handle window resizing
 function windowResized() {
   let newSize = calculateCanvasSize();
   resizeCanvas(newSize, newSize);
@@ -796,24 +798,94 @@ function windowResized() {
   // Reset and translate to center of canvas
   resetMatrix();
   translate(width / 2, height / 2);
-  
-  // Initialize the mandala if the window is first time loaded
-  // Uncomment this when the redrawMandala function is implemented (also delete this comment)
-  // if (isFirstTimeLoaded) {
-  //   newArt();
-  //   isFirstTimeLoaded = false;
-  // }
 
   // Redraw the mandala with updated dimensions
   if (!isAnimating) {
-    newArt(); // Remove when redrawCurrentMandalaWithUpdatedDimensions function is implemented
-    // redrawCurrentMandalaWithUpdatedDimensions(); // Uncomment this when the redrawCurrentMandalaWithUpdatedDimensions function is implemented
+    redrawCurrentMandalaWithUpdatedDimensions(); // This function also already handles initializing a new art when the program is first time loaded
   }
 }
 
-// Redraw the mandala when the window is resized
+// ─────────────────────────────────────────────────────────────────────────────────────────────────
+// Redraw the mandala when the window is resized (preserving the art's current properties)
 function redrawCurrentMandalaWithUpdatedDimensions() {
-  // TODO: Implement this function
+  // Clear the canvas
+  background(0);
+  
+  // Reset and translate to center of canvas with new dimensions
+  resetMatrix();
+  translate(width / 2, height / 2);
+  
+  // Recalculate layer cushion based on new canvas size
+  if (numLayers) {
+    let overlapValue = overlapSlider.value() / 100;
+    layerCushion = (halfCanvasSize / numLayers) * (0.8 + (overlapValue * 0.3));
+  }
+  
+  // Preserve current animation state values
+  let currentOpacity = opacityValue;
+  let currentRotation = rotationAngle;
+  let preservedScale = currentScale || 1.0;
+  
+  // If animation was stopped, we need to preserve the last visual state
+  if (!isAnimating) {
+    // Use the last known opacity value
+    if (lastPulseOpacity !== undefined) {
+      currentOpacity = lastPulseOpacity;
+    }
+    
+    // Use the last known rotation angle
+    if (lastRotationAngle !== undefined) {
+      currentRotation = lastRotationAngle;
+    }
+    
+    // Use the last known scale
+    if (lastScale !== undefined) {
+      preservedScale = lastScale;
+    }
+  }
+  
+  // Apply scale transformation if needed
+  if (preservedScale !== 1.0) {
+    scale(preservedScale);
+  }
+  
+  // Only redraw if we have the necessary parameters
+  if (numLayers && numPetals && petalAngle !== undefined && 
+      halfCanvasSize && layerCushion !== undefined && 
+      colorHarmony !== undefined && baseHue !== undefined && 
+      currentOpacity !== undefined && showOutline !== undefined && 
+      curveStyle !== undefined && strokeWeightValue !== undefined) {
+    
+    // Draw the mandala art with preserved state
+    for (let j = 0; j < numLayers; j++) {
+      // For static redraw, we need to handle rotation manually if it was applied
+      if (currentRotation !== 0 && !isAnimating) {
+        push();
+        let layerProgress = j / numLayers;
+        rotate(currentRotation * (1 - layerProgress * 0.5));
+      }
+      
+      initialColors = drawMandalaLayer(j, numLayers, numPetals, petalAngle, halfCanvasSize, 
+                                     layerCushion, colorHarmony, baseHue, currentOpacity, 
+                                     showOutline, curveStyle, strokeWeightValue, 
+                                     isAnimating, animationFrame || 0, 
+                                     isAnimating && colorShiftCheckbox.checked(), 
+                                     initialColors, 
+                                     isAnimating && rotationCheckbox.checked(), 
+                                     currentRotation);
+      
+      // End rotation transform if we applied it manually
+      if (currentRotation !== 0 && !isAnimating) {
+        pop();
+        // Rotate for next layer (same as in drawMandalaLayer)
+        rotate(petalAngle);
+      }
+    }
+  } else {
+    // If we don't have all the necessary parameters, resort to creating new art (sample scenario is when the program is first time loaded)
+    console.log("Missing mandala parameters, generating new art");
+    newArt();
+  }
 }
 
 // ─────────────────────────────────────────────────────────────────────────────────────────────────
