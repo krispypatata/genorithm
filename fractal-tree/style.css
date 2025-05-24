@@ -7,8 +7,8 @@ html, body {
   height: 100vh;
   overflow: hidden;
 
-  font-family: Arial, sans-serif;
-  background-color: #f0f0f0;
+  font-family: 'Montserrat', sans-serif;
+  background-color: #e7e8f0;
   color: #333;
 }
 
@@ -45,7 +45,6 @@ canvas {
   padding: 10px;
   flex-shrink: 0;
   background-color: #ffffff;
-  border: 1px solid #000000;
   border-radius: 8px; /* Rounded edges */
   box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
 }
@@ -91,7 +90,7 @@ canvas {
   /* margin: 5px 0 !important;
   padding: 5px !important; */
   background-color: #ffffff;
-  border: 1px solid #000000;
+  /* border: 1px solid #000000; */
   border-radius: 8px; /* Rounded edges */
 }
 
@@ -109,7 +108,7 @@ canvas {
   /* margin: 5px 0 !important;
   padding: 5px !important; */
   background-color: #ffffff;
-  border: 1px solid #000000;
+  /* border: 1px solid #000000; */
   border-radius: 8px; /* Rounded edges */
 }
 
@@ -128,7 +127,7 @@ canvas {
   /* margin: 5px 0 !important;
   padding: 5px !important; */
   background-color: #ffffff;
-  border: 1px solid #000000;
+  /* border: 1px solid #000000; */
   border-radius: 8px; /* Rounded edges */
 }
 
@@ -139,10 +138,10 @@ canvas {
 .enhancements-section {
   margin-bottom: 15px;
   padding: 10px;
-  border: 1px solid #ddd;
+  /* border: 1px solid #ddd; */
   border-radius: 8px;
   /* background-color: #f9f9f9; */
-  border: 1px solid #000000;
+  /* border: 1px solid #000000; */
   border-radius: 8px;
 }
 
@@ -256,21 +255,23 @@ button.active {
 }
 
 .main-buttons-container button {
-  background-color: yellow;
-  color: #000000;
-  border: 1px solid #000000;
+  background-color: #222224;
+  color: #fff;
+  border: 1px solid #2d2d2d;
   border-radius: 8px; /* Rounded edges */
   padding: 8px 16px;
   margin: 4px;
-  font-size: 14px;
   cursor: pointer;
   transition: background-color 0.2s, transform 0.2s;
+  font-family: 'Major Mono Display', monospace;
+  font-weight: bold;
+  font-size: 0.6rem;
 
   width: calc(95%);
 }
 
 .main-buttons-container button:hover {
-  background-color: yellow;
+  background-color: #222224;
   transform: scale(1.02);
 }
 

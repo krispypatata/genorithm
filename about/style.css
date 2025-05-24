@@ -1,9 +1,9 @@
 html, body {
   margin: 0;
   padding: 0;
-  font-family: 'Arial', sans-serif;
-  background-color: #ffffff;
+  font-family: 'Montserrat', sans-serif;
   color: #333333;
+  background: linear-gradient(-181deg, rgb(0, 0, 0) 0%, rgb(0, 0, 0) 50%, rgb(9, 15, 35) 100%);
 }
 
 canvas {
@@ -15,17 +15,28 @@ canvas {
   left: 0;
   margin: 0;
   padding: 0;
+  pointer-events: auto;
+}
+
+#canvas-wrapper {
+  position: relative;
+  top: 60px;
+  width: 100%;
+  z-index: 10;
+  pointer-events: none;
 }
 
 #canvas-container {
-  position: relative;
   width: 100%;
   height: calc(100vh / 2);
-  overflow: hidden;
   margin: 0;
   padding: 0;
   display: block;
   line-height: 0;
+}
+
+p.overview span{
+  font-family: 'Major Mono Display', monospace;
 }
 
 .content-container {
@@ -34,13 +45,14 @@ canvas {
   padding: 1rem 2rem;
   position: relative;
   line-height: normal;
-  background-color: #ffffff;
+  background-color: transparent;
+  color: white;
 }
 
 p {
   line-height: 1.6;
   margin-bottom: 0.5rem;
-  font-size: 1.1rem;
+  font-size: 1rem;
   text-align: center;
   margin-left: auto;
   margin-right: auto;
@@ -72,7 +84,6 @@ p {
   margin: 0 auto;
   display: flex;
   flex-wrap: wrap;
-  justify-content: center;
 }
 
 .group-member {
@@ -81,6 +92,7 @@ p {
   padding: 0.2rem;
   box-sizing: border-box;
   text-align: center;
+  font-size: 0.9rem;
   margin: 0;
   line-height: 1.2;
   float: none;
@@ -100,4 +112,46 @@ p {
   .group-member {
     width: 100%;
   }
+}
+
+.fractal-accent1 {
+  position: fixed;
+  bottom: -400px;
+  right: -200px;
+  width: 700px;
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(0.5px);
+}
+
+.fractal-accent2 {
+  position: fixed;
+  top: 0;
+  left: -200px;
+  width: 700px;
+  opacity: 0.25;
+  pointer-events: none;
+  z-index: 0;
+  filter: blur(0.5px);
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+/* Track */
+::-webkit-scrollbar-track {
+  background: linear-gradient(-181deg, rgb(0, 0, 0) 0%, rgb(0, 0, 0) 50%, rgb(9, 15, 35) 100%);
+}
+
+/* Handle */
+::-webkit-scrollbar-thumb {
+  background: #0c0d29;
+  border-radius: 50px;
+}
+
+/* Handle on hover */
+::-webkit-scrollbar-thumb:hover {
+  background: #131336;
 }
